@@ -1,0 +1,75 @@
+{% extends 'main/auth_base.html' %}
+{% load widget_tweaks %}
+
+{% block title %}Register{% endblock %}
+{% block branding_text %}Unlock Your <br>Future.{% endblock %}
+
+{% block auth_content %}
+<div class="space-y-6">
+    <div class="text-center md:text-left">
+        <h2 class="text-2xl font-bold text-slate-800">Create Account</h2>
+        <p class="text-slate-500 text-sm">Join the professional network today</p>
+    </div>
+
+    <form method="POST" class="space-y-4">
+        {% csrf_token %}
+        
+        <div class="grid grid-cols-2 gap-4">
+            <div>
+                <label class="block text-xs font-bold uppercase text-slate-400 mb-1 ml-1">Full Name</label>
+                {% render_field form.name class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition" placeholder="John Doe" %}
+                {% if form.name.errors %}
+                    <p class="text-red-600 text-sm mt-1">
+                        {{ form.name.errors.0 }}
+                    </p>
+                {% endif %}
+            </div>
+            <div>
+                <label class="block text-xs font-bold uppercase text-slate-400 mb-1 ml-1">Role</label>
+                <select name="role" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition appearance-none">
+                    <option value="recruiter">Recruiter</option>
+                    <option value="job_seeker">Job Seeker</option>
+                </select>
+            </div>
+        </div>
+
+        <div>
+            <label class="block text-xs font-bold uppercase text-slate-400 mb-1 ml-1">Email</label>
+            {% render_field form.email class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition" placeholder="name@email.com" %}
+            {% if form.email.errors %}
+                <p class="text-red-600 text-sm mt-1">
+                    {{ form.email.errors.0 }}
+                </p>
+            {% endif %}
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+                <label class="block text-xs font-bold uppercase text-slate-400 mb-1 ml-1">Password</label>
+                {% render_field form.password class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition" placeholder="••••••••" %}
+                {% if form.non_fields_errors %}
+                    <p class="text-red-600 text-sm mt-1">
+                        {{ form.non_fields_errors.0 }}
+                    </p>
+                {% endif %}
+            </div>
+            <div>
+                <label class="block text-xs font-bold uppercase text-slate-400 mb-1 ml-1">Confirm</label>
+                {% render_field form.confirm_password class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition" placeholder="••••••••" %}
+                {% if form.non_field_errors %}
+                    <p class="text-red-600 text-sm mt-1">
+                        {{ form.non_field_errors.0 }}
+                    </p>
+                {% endif %}
+            </div>
+        </div>
+        <button type="submit" class="w-full bg-blue-600 text-white font-bold py-3 rounded-xl hover:bg-blue-700 transition-all shadow-lg shadow-blue-200">
+            Create Account
+        </button>
+    </form>
+
+    <p class="text-center text-sm text-slate-600">
+        Already have an account? <a href="{% url 'accounts:login' %}" class="text-blue-600 font-bold hover:underline">Log In</a>
+    </p>
+</div>
+{% endblock %}

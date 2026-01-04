@@ -1,0 +1,43 @@
+{% extends 'main/index.html' %}
+
+{% block title %}Home | WorkFlow{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto space-y-8">
+    
+    <div class="mb-8">
+        <h2 class="text-2xl font-bold text-slate-800">Your Feed</h2>
+        <p class="text-slate-500 text-sm">Based on your saved skills and interests</p>
+    </div>
+
+    <article class="bg-white border border-slate-200 rounded-3xl shadow-sm overflow-hidden transition hover:border-blue-300">
+        <div class="p-5 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-12 h-12 rounded-2xl bg-slate-50 flex items-center justify-center p-2">
+                    <img src="https://logo.clearbit.com/apple.com" alt="Apple">
+                </div>
+                <div>
+                    <h4 class="font-bold text-slate-800">Apple Inc.</h4>
+                    <p class="text-xs text-slate-400 uppercase">Cupertino, CA • 2h ago</p>
+                </div>
+            </div>
+            <button class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-ellipsis-vertical"></i></button>
+        </div>
+
+        <div class="px-5 pb-6">
+            <h3 class="text-lg font-bold text-slate-800 mb-2">Lead Frontend Developer</h3>
+            <p class="text-slate-600 text-sm leading-relaxed mb-4">
+                We are looking for a visionary developer to craft world-class interfaces for our next generation of products.
+            </p>
+            <div class="flex gap-2 mb-4">
+                <span class="px-3 py-1 bg-slate-100 text-slate-600 text-xs rounded-lg font-semibold">SwiftUI</span>
+                <span class="px-3 py-1 bg-slate-100 text-slate-600 text-xs rounded-lg font-semibold">React</span>
+            </div>
+            <button class="w-full bg-slate-900 text-white py-3 rounded-xl font-bold hover:bg-slate-800 transition">
+                Quick Apply
+            </button>
+        </div>
+    </article>
+
+</div>
+{% endblock content %}

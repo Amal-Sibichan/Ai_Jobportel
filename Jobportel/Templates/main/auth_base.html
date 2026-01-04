@@ -1,0 +1,34 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <title>{% block title %}{% endblock %} | WorkFlow Pro</title>
+</head>
+<body class="bg-slate-50 font-sans">
+    <div class="min-h-screen flex items-center justify-center p-4">
+        <div class="max-w-4xl w-full bg-white rounded-3xl shadow-2xl overflow-hidden flex flex-col md:flex-row min-h-[600px]">
+            
+            <div class="hidden md:flex md:w-1/2 bg-blue-600 p-12 text-white flex-col justify-between relative overflow-hidden">
+                <div class="absolute -top-10 -left-10 w-40 h-40 bg-blue-500 rounded-full opacity-50"></div>
+                <div class="absolute -bottom-20 -right-10 w-64 h-64 bg-blue-700 rounded-full opacity-50"></div>
+                <div class="relative z-10">
+                    <h2 class="text-3xl font-bold mb-2">WorkFlow</h2>
+                    <p class="text-blue-100 italic text-sm">The Professional Recruitment Suite</p>
+                </div>
+                <div class="relative z-10">
+                    <h3 class="text-4xl font-bold leading-tight mb-4">{% block branding_text %}{% endblock %}</h3>
+                </div>
+                <div class="relative z-10 text-sm text-blue-200">&copy; 2026 WorkFlow Inc.</div>
+            </div>
+
+            <div class="w-full md:w-1/2 p-8 md:p-12 flex flex-col justify-center">
+                {% block auth_content %}{% endblock %}
+            </div>
+        </div>
+    </div>
+</body>
+</html>

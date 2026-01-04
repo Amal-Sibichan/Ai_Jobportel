@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <title>{% block title %}WorkFlow{% endblock %}</title>
+    <style>
+        .active-link { @apply bg-blue-50 text-blue-600 font-semibold; }
+    </style>
+</head>
+<body class="bg-slate-50 font-sans text-slate-900 flex">
+
+    <aside class="w-20 lg:w-64 h-screen sticky top-0 bg-white border-r border-slate-200 flex flex-col p-4 lg:p-6">
+        <div class="mb-10 lg:px-2 flex items-center gap-2">
+            <div class="bg-blue-600 p-1.5 rounded-lg text-white">
+                <i class="fa-solid fa-briefcase text-xl"></i>
+            </div>
+            <h1 class="text-xl font-bold hidden lg:block tracking-tight text-slate-800">WorkFlow</h1>
+        </div>
+
+        <nav class="flex-1 space-y-2">
+            <a href="/" class="flex items-center gap-4 p-3 rounded-xl transition hover:bg-slate-50">
+                <i class="fa-solid fa-house text-xl text-blue-600"></i>
+                <span class="hidden lg:block">Home</span>
+            </a>
+            <a href="/explore" class="flex items-center gap-4 p-3 text-slate-500 hover:bg-slate-50 rounded-xl transition">
+                <i class="fa-solid fa-compass text-xl"></i>
+                <span class="hidden lg:block">Discover</span>
+            </a>
+            </nav>
+
+        <div class="mt-auto pt-4 border-t border-slate-100">
+            <a href="/logout" class="flex items-center gap-4 p-3 text-slate-500 hover:text-rose-600 transition">
+                <i class="fa-solid fa-right-from-bracket text-xl"></i>
+                <span class="hidden lg:block font-medium">Logout</span>
+            </a>
+        </div>
+    </aside>
+
+    <div class="flex-1 flex flex-col">
+        
+        <header class="bg-white border-b border-slate-200 sticky top-0 z-30 px-6 py-4">
+            <div class="max-w-4xl mx-auto flex items-center gap-6">
+                <div class="flex-1 relative">
+                    <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-slate-400">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                    </span>
+                    <input type="text" placeholder="Search jobs, companies..." 
+                           class="w-full pl-11 pr-4 py-2.5 bg-slate-100 border-none rounded-2xl focus:ring-2 focus:ring-blue-500 outline-none text-sm">
+                </div>
+                
+                <div class="flex items-center gap-3">
+                    <button class="hidden md:block bg-blue-600 text-white px-5 py-2.5 rounded-xl font-bold text-sm hover:bg-blue-700 transition">
+                        Post Job
+                    </button>
+                    <div class="w-10 h-10 rounded-full border-2 border-white shadow-sm overflow-hidden">
+                        <img src="https://ui-avatars.com/api/?name=User&background=0284c7&color=fff" alt="User">
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <main class="p-6 md:p-10">
+            {% block content %}
+            {% endblock content %}
+        </main>
+    </div>
+
+</body>
+</html>
