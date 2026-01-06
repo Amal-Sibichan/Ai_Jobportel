@@ -4,6 +4,7 @@ from django.forms import ModelForm
 from django import forms
 from Seeker.models import seeker
 from django.core.exceptions import ValidationError
+from django.contrib.auth import authenticate
 import re
 
 class register(forms.Form):
@@ -42,7 +43,7 @@ class register(forms.Form):
 
         return cleaned_data
 
-class login(forms.Form):
+class login_form(forms.Form):
     role = forms.CharField(required=True)
     email = forms.EmailField(required=True)
     password = forms.CharField(widget=forms.PasswordInput, required=True)
@@ -59,7 +60,7 @@ class login(forms.Form):
         user = None
 
         if role == 'job_seeker':
-            user = seeker.objects.filter(email=email, password=password).first()
+            user = authenticate(username=email, password=password)
         # elif role == 'recruiter':
         #     user = Recruter.objects.filter(email=email, password=password).first()
         else:

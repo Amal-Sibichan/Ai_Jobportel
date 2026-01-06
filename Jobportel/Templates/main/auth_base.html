@@ -7,6 +7,26 @@
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <title>{% block title %}{% endblock %} | WorkFlow Pro</title>
+    {% if messages %}
+<div class="fixed top-5 left-1/2 -translate-x-1/2 z-50 space-y-3">
+  {% for message in messages %}
+    <div class="
+      px-4 py-3 rounded-lg shadow-lg text-white
+      {% if message.tags == 'success' %} bg-green-500
+      {% elif message.tags == 'error' %} bg-red-500
+      {% elif message.tags == 'warning' %} bg-yellow-500 text-black
+      {% else %} bg-blue-500 {% endif %}
+    ">
+      <div class="flex justify-between items-center">
+        <span>{{ message }}</span>
+        <button onclick="this.parentElement.parentElement.remove()"
+                class="ml-4 text-xl font-bold">&times;</button>
+      </div>
+    </div>
+  {% endfor %}
+</div>
+{% endif %}
+
 </head>
 <body class="bg-slate-50 font-sans">
     <div class="min-h-screen flex items-center justify-center p-4">

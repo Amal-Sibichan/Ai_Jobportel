@@ -1,0 +1,271 @@
+{% extends 'main/index.html' %}
+{% load static %}
+
+{% block title %}My Profile | WorkFlow{% endblock %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto space-y-8">
+    <div id="skill-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center hidden">
+    <div class="bg-white w-full max-w-md rounded-3xl shadow-2xl p-8 transform transition-all">
+        <div class="flex justify-between items-center mb-6">
+            <h3 class="text-xl font-bold text-slate-800">Add New Skill</h3>
+            <button onclick="toggleModal('skill-modal')" class="text-slate-400 hover:text-slate-600">
+                <i class="fa-solid fa-xmark text-xl"></i>
+            </button>
+        </div>
+        <form id="skill-form" class="space-y-4">
+            {% csrf_token %}
+            <div>
+                <label class="block text-xs font-bold uppercase text-slate-400 mb-2">Skill Name</label>
+                <input type="text" id="skill-input" placeholder="e.g. React, Kubernetes" 
+                       class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition">
+            </div>
+            <button type="submit" class="w-full bg-blue-600 text-white font-bold py-3 rounded-xl hover:bg-blue-700 transition shadow-lg shadow-blue-100">
+                Add to Profile
+            </button>
+        </form>
+    </div>
+</div>
+    
+    <div class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
+        <div class="h-32 bg-gradient-to-r from-blue-600 to-indigo-700 relative">
+            <button class="absolute top-4 right-4 bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded-xl text-xs font-bold backdrop-blur-md transition">
+                <i class="fa-solid fa-camera mr-2"></i> Edit Cover
+            </button>
+        </div>
+        
+        <div class="px-8 pb-8 flex flex-col md:flex-row items-end gap-6 -mt-12 relative z-10">
+            <div class="w-32 h-32 rounded-3xl border-4 border-white shadow-lg overflow-hidden bg-slate-100 shrink-0">
+                <img src="https://ui-avatars.com/api/?name=John+Doe&background=0284c7&color=fff&size=128" alt="Profile" class="w-full h-full object-cover">
+            </div>
+            
+            <div class="flex-1 mb-2">
+                <h1 class="text-3xl font-bold text-slate-800">{{ user.first_name}}</h1>
+                <p class="text-slate-500 font-medium flex items-center gap-2">
+                    <i class="fa-solid fa-briefcase text-blue-600"></i> Senior Python Developer at TechNova
+                </p>
+                <p class="text-slate-400 text-sm mt-1">
+                    <i class="fa-solid fa-location-dot mr-1"></i> New York, USA • <span class="text-emerald-600 font-bold">Actively Looking</span>
+                </p>
+            </div>
+
+            <div class="flex gap-3 mb-2">
+                <button class="px-6 py-2.5 border border-slate-200 text-slate-700 rounded-xl font-bold hover:bg-slate-50 transition">
+                    Share Profile
+                </button>
+                <button class="px-6 py-2.5 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition shadow-lg shadow-blue-100">
+                    Edit Profile
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        
+        <div class="space-y-6">
+            <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm">
+                <h3 class="font-bold text-slate-800 mb-4 text-lg">Contact Information</h3>
+                <div class="space-y-4 text-sm">
+                    <div class="flex items-center gap-3 text-slate-600">
+                        <div class="w-8 h-8 bg-slate-50 rounded-lg flex items-center justify-center text-blue-600">
+                            <i class="fa-regular fa-envelope"></i>
+                        </div>
+                        <span>{{ user.email }}</span>
+                    </div>
+                    <div class="flex items-center gap-3 text-slate-600">
+                        <div class="w-8 h-8 bg-slate-50 rounded-lg flex items-center justify-center text-blue-600">
+                            <i class="fa-solid fa-phone"></i>
+                        </div>
+                        <span>+1 (555) 012-3456</span>
+                    </div>
+                    <div class="flex items-center gap-3 text-slate-600">
+                        <div class="w-8 h-8 bg-slate-50 rounded-lg flex items-center justify-center text-blue-600">
+                            <i class="fa-brands fa-linkedin"></i>
+                        </div>
+                        <a href="#" class="text-blue-600 font-medium hover:underline">linkedin.com/in/johndoe</a>
+                    </div>
+                </div>
+            </div>
+
+<div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="font-bold text-slate-800 text-lg">Skills</h3>
+                    <button onclick="toggleModal('skill-modal')" class="w-8 h-8 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition">
+                        <i class="fa-solid fa-plus"></i>
+                    </button>
+                </div>
+                <div id="skills-container" class="flex flex-wrap gap-2">
+                    {% for skill in skills %}
+                    <span id="skill-{{ skill.id }}" class="group flex items-center gap-2 px-3 py-1.5 bg-slate-100 text-slate-700 rounded-lg text-xs font-bold transition hover:bg-rose-50 hover:text-rose-600">
+                        {{skill.name}}
+                        <button class="opacity-0 group-hover:opacity-100 transition-opacity" onclick="deleteSkill('{{skill.id}}')">
+                            <i class="fa-solid fa-circle-xmark"></i>
+                        </button>
+                    </span>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <div class="lg:col-span-2 space-y-6">
+            <div class="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm">
+                <h3 class="font-bold text-slate-800 mb-4 text-lg">About Me</h3>
+                <p class="text-slate-600 leading-relaxed">
+                    Passionate Senior Python Developer with over 6 years of experience building scalable backend architectures. I specialize in Django, RESTful APIs, and cloud-native solutions. I love solving complex problems and mentoring junior developers to achieve their best work.
+                </p>
+            </div>
+
+            <div class="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm">
+                <div class="flex items-center justify-between mb-8">
+                    <h3 class="font-bold text-slate-800 text-lg">Work Experience</h3>
+                    <button class="text-blue-600 text-sm font-bold">Add Experience</button>
+                </div>
+                
+                <div class="space-y-8 relative">
+                    <div class="absolute left-[23px] top-2 bottom-2 w-0.5 bg-slate-100"></div>
+
+                    <div class="relative flex gap-6">
+                        <div class="w-12 h-12 bg-white border-2 border-slate-100 rounded-2xl flex items-center justify-center shrink-0 z-10 shadow-sm overflow-hidden p-2">
+                            <img src="https://logo.clearbit.com/microsoft.com" alt="Microsoft">
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-slate-800">Senior Software Engineer</h4>
+                            <p class="text-sm font-semibold text-blue-600">Microsoft • Full-time</p>
+                            <p class="text-xs text-slate-400 mt-1">Jan 2022 - Present • 4 yrs</p>
+                            <p class="text-sm text-slate-600 mt-3">Leading the development of cloud-based internal tools and managing a team of 5 developers.</p>
+                        </div>
+                    </div>
+
+                    <div class="relative flex gap-6">
+                        <div class="w-12 h-12 bg-white border-2 border-slate-100 rounded-2xl flex items-center justify-center shrink-0 z-10 shadow-sm overflow-hidden p-2">
+                            <img src="https://logo.clearbit.com/github.com" alt="GitHub">
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-slate-800">Python Developer</h4>
+                            <p class="text-sm font-semibold text-blue-600">GitHub • Contract</p>
+                            <p class="text-xs text-slate-400 mt-1">Jun 2019 - Dec 2021 • 2.5 yrs</p>
+                            <p class="text-sm text-slate-600 mt-3">Focused on improving API response times and optimizing database queries for high-traffic endpoints.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm">
+                <div class="flex items-center justify-between mb-8">
+                    <h3 class="font-bold text-slate-800 text-lg">Education</h3>
+                    <button class="text-blue-600 text-sm font-bold">Add Education</button>
+                </div>
+                
+                <div class="space-y-8 relative">
+                    <div class="absolute left-[23px] top-2 bottom-2 w-0.5 bg-slate-100"></div>
+
+                    <div class="relative flex gap-6">
+                        <div class="w-12 h-12 bg-white border-2 border-slate-100 rounded-2xl flex items-center justify-center shrink-0 z-10 shadow-sm text-blue-600">
+                            <i class="fa-solid fa-graduation-cap text-xl"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-slate-800">Master of Computer Science</h4>
+                            <p class="text-sm font-semibold text-blue-600">Stanford University</p>
+                            <p class="text-xs text-slate-400 mt-1">2017 - 2019 • CGPA: 3.9/4.0</p>
+                        </div>
+                    </div>
+
+                    <div class="relative flex gap-6">
+                        <div class="w-12 h-12 bg-white border-2 border-slate-100 rounded-2xl flex items-center justify-center shrink-0 z-10 shadow-sm text-blue-600">
+                            <i class="fa-solid fa-university text-xl"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-slate-800">B.Tech in Information Technology</h4>
+                            <p class="text-sm font-semibold text-blue-600">MIT University</p>
+                            <p class="text-xs text-slate-400 mt-1">2013 - 2017</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    // Toggle Modal
+    function toggleModal(id) {
+        document.getElementById(id).classList.toggle('hidden');
+    }
+
+    // AJAX: Add Skill
+    document.getElementById('skill-form').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const input = document.getElementById('skill-input');
+        const skillName = input.value;
+        
+        try {
+            const response = await fetch('{% url "add_skill" %}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify({ name: skillName })
+            });
+
+            if (response.ok) {
+                const data = await response.json(); // data.id is the NEW ID from Django
+                const container = document.getElementById('skills-container');
+                
+                // Create the element properly
+                const newSpan = document.createElement('span');
+                newSpan.id = `skill-${data.id}`; // Ensure this ID matches the database ID
+                newSpan.className = "group flex items-center gap-2 px-3 py-1.5 bg-slate-100 text-slate-700 rounded-lg text-xs font-bold transition hover:bg-rose-50 hover:text-rose-600";
+                
+                // IMPORTANT: Use the data.id returned from the server in the onclick
+                newSpan.innerHTML = `
+                    ${data.name}
+                    <button class="opacity-0 group-hover:opacity-100 transition-opacity" onclick="deleteSkill('${data.id}')">
+                        <i class="fa-solid fa-circle-xmark"></i>
+                    </button>
+                `;
+                
+                container.appendChild(newSpan);
+                input.value = "";
+                toggleModal('skill-modal');
+            }
+        } catch (err) {
+            alert("Error adding skill. Check your internet or backend.");
+        }
+    });
+
+    // AJAX: Delete Skill
+    async function deleteSkill(id) {
+    if (!confirm("Remove this skill?")) return;
+    
+    try {
+        const response = await fetch(`/user/delete_skill/${id}/`, {
+            method: 'DELETE',
+            headers: { 
+                'X-CSRFToken': '{{ csrf_token }}',
+                'Content-Type': 'application/json'
+            }
+        });
+
+        // Log the response status for debugging
+        console.log("Response Status:", response.status);
+
+        if (response.ok) {
+            // Find the element by the ID we set in the HTML: id="skill-{{ skill.id }}"
+            const element = document.getElementById(`skill-${id}`);
+            if (element) {
+                element.remove(); // This removes it without a refresh
+                console.log("Element removed from DOM");
+            } else {
+                console.error(`Could not find DOM element with id: skill-${id}`);
+            }
+        } else {
+            const data = await response.json();
+            alert("Server Error: " + data.message);
+        }
+    } catch (err) {
+        console.error("Fetch Error:", err);
+        alert("Could not delete skill. Check console for details.");
+    }
+
+    }
+</script>
+{% endblock %}
