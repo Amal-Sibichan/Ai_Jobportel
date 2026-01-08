@@ -8,6 +8,8 @@ class seeker(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     image = models.ImageField(upload_to='profile_pics',null=True,blank=True)
     phone=models.CharField(max_length=15,null=True)
+    headline=models.CharField(max_length=15,null=True)
+    discription=models.CharField(max_length=15,null=True)
     address=models.CharField(max_length=100,null=True)
     city=models.CharField(max_length=100,null=True)
     state=models.CharField(max_length=100,null=True)

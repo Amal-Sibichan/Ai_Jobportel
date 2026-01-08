@@ -24,6 +24,7 @@ class register(forms.Form):
         if not re.match("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$", email):
             raise ValidationError("Invalid email format")
         return email
+    
     def clean(self):
         cleaned_data = super().clean()
         password = cleaned_data.get('password')
