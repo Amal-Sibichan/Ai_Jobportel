@@ -1,11 +1,15 @@
+from django.core.checks.messages import Info
 from django.shortcuts import render
 import json
 from django.http import JsonResponse
 from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST, require_http_methods
+from numpy import info
 from .models import Experience, seeker,skill,Education,resume
 from .forms import profileupdateform,upload_resume
+from .utils import extract,entity_score_spacy,atscore,pool_score,semantic_similarity,jaccard_skill_score,generate_vector
+from .LLM import extract_skills_llm
 # Create your views here.
 def user_dash(request):
     return HttpResponse("user dash")
@@ -114,6 +118,18 @@ def Resume_upload(request):
             res=form.cleaned_data['resume']
             if user_res.resume.resume:
                 user_res.resume.delete()
-            new_res = resume.objects.create(resume=res,seeker=user_res)
+            
+            res_text=extract(res)
+            vector_Emp=generate_vector(res_text)
+            Info=extract_skills_llm(res_text)
+            try:
+                resume_info = json.loads(Info)
+            except json.JSONDecodeError:
+                print("Invalid JSON format.")
+                return HttpResponse("Invalid JSON format")
+            ats_score=atscore(resume_info)
+            entity_score=entity_score_spacy(res_text) 
+            skill_list=resume_info.get('skills', [])  
+            new_res = resume.objects.create(resume=res,seeker=user_res,resume_vector=vector_Emp,resume_text=res_text,ats_score=ats_score,semantic_score=entity_score,skills=skill_list)
             new_res.save()
             return HttpResponse("Resume Uploaded")
