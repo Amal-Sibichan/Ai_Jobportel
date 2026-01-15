@@ -21,20 +21,35 @@
         </div>
 
         <nav class="flex-1 space-y-2">
+            {% if request.user.recruter %}
+            <a href="{% url 'recruiter:recruter_page' %}" class="flex items-center gap-4 p-3 rounded-xl transition hover:bg-slate-50">
+                <i class="fa-solid fa-house text-xl text-blue-600"></i>
+                <span class="hidden lg:block">Home</span>
+            </a>
+            {% elif request.user.seeker %}
             <a href="/" class="flex items-center gap-4 p-3 rounded-xl transition hover:bg-slate-50">
                 <i class="fa-solid fa-house text-xl text-blue-600"></i>
                 <span class="hidden lg:block">Home</span>
             </a>
+            {% endif %}
             <a href="/explore" class="flex items-center gap-4 p-3 text-slate-500 hover:bg-slate-50 rounded-xl transition">
                 <i class="fa-solid fa-compass text-xl"></i>
                 <span class="hidden lg:block">Discover</span>
             </a>
-            </nav>
-            <a href="{% url 'seeker/profile' %}" class="flex items-center gap-4 p-3 text-slate-500 hover:bg-slate-50 rounded-xl transition">
+            {% if request.user.seeker %}
+            <a href="{% url 'seeker:profile' %}" class="flex items-center gap-4 p-3 text-slate-500 hover:bg-slate-50 rounded-xl transition">
                 <i class="fa-solid fa-compass text-xl"></i>
                 <span class="hidden lg:block">Profile</span>
             </a>
-            </nav>
+            {% elif request.user.recruter %}
+            <a href="{% url 'recruiter:recruter_profile' %}" class="flex items-center gap-4 p-3 text-slate-500 hover:bg-slate-50 rounded-xl transition">
+                <i class="fa-solid fa-compass text-xl"></i>
+                <span class="hidden lg:block">Your Profile</span>
+            </a>
+            {% endif %}
+
+
+        </nav>
 
         <div class="mt-auto pt-4 border-t border-slate-100">
             <a href="{% url 'accounts:logout' %}" class="flex items-center gap-4 p-3 text-slate-500 hover:text-rose-600 transition">
@@ -57,9 +72,6 @@
                 </div>
                 
                 <div class="flex items-center gap-3">
-                    <button class="hidden md:block bg-blue-600 text-white px-5 py-2.5 rounded-xl font-bold text-sm hover:bg-blue-700 transition">
-                        Post Job
-                    </button>
                     <div class="w-10 h-10 rounded-full border-2 border-white shadow-sm overflow-hidden">
                         <img src="https://ui-avatars.com/api/?name=User&background=0284c7&color=fff" alt="User">
                         

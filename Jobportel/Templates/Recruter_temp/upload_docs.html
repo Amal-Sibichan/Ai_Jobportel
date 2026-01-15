@@ -1,0 +1,144 @@
+{% extends 'main/index.html' %}
+{% load widget_tweaks %}
+
+{% block content %}
+<div class="min-h-screen bg-slate-50 py-12 px-4">
+    <div class="max-w-4xl mx-auto">
+        
+        <div class="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm mb-8 flex flex-col md:flex-row justify-between items-center gap-6">
+            <div>
+                <h1 class="text-2xl font-bold text-slate-800">Business Verification</h1>
+                <p class="text-slate-500 text-sm">Upload official documents to verify your organization.</p>
+            </div>
+            <div class="text-center">
+                {% if docs.all_documents_verified %}
+                    <span class="px-6 py-2 bg-emerald-100 text-emerald-700 rounded-full text-xs font-bold uppercase tracking-widest border border-emerald-200 flex items-center gap-2">
+                        <i class="fa-solid fa-circle-check"></i> Fully Verified
+                    </span>
+                {% else %}
+                    <span class="px-6 py-2 bg-amber-100 text-amber-700 rounded-full text-xs font-bold uppercase tracking-widest border border-amber-200 flex items-center gap-2">
+                        <i class="fa-solid fa-clock"></i> Verification Pending
+                    </span>
+                {% endif %}
+            </div>
+        </div>
+
+        <form method="POST" enctype="multipart/form-data" class="space-y-6">
+            {% csrf_token %}
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                
+                <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-4">
+                    <div class="flex justify-between items-start">
+                        <div class="w-12 h-12 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center">
+                            <i class="fa-solid fa-file-invoice text-xl"></i>
+                        </div>
+                        {% if docs.gst_verified %}
+                            <i class="fa-solid fa-circle-check text-emerald-500 text-xl"></i>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-slate-800">GST Certificate</h3>
+                        <p class="text-[11px] text-slate-400 uppercase font-bold tracking-tight">Required for Tax Compliance</p>
+                    </div>
+                    
+                    <div class="pt-2">
+                        {% if docs.gst_certificate %}
+                            <div class="flex items-center justify-between bg-slate-50 p-3 rounded-xl mb-3">
+                                <span class="text-xs font-medium text-slate-600 truncate max-w-[150px]">{{ docs.gst_certificate.name|cut:'recruter_docs/gst/' }}</span>
+                                <a href="{{ docs.gst_certificate.url }}" target="_blank" class="text-blue-600 text-[10px] font-bold hover:underline">View</a>
+                            </div>
+                        {% endif %}
+                        <label class="block">
+                            <span class="sr-only">Choose File</span>
+                            {% render_field form.gst_certificate class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer" %}
+                        </label>
+                    </div>
+                </div>
+
+                <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-4">
+                    <div class="flex justify-between items-start">
+                        <div class="w-12 h-12 bg-purple-50 text-purple-600 rounded-2xl flex items-center justify-center">
+                            <i class="fa-solid fa-id-card-clip text-xl"></i>
+                        </div>
+                        {% if docs.registration_verified %}
+                            <i class="fa-solid fa-circle-check text-emerald-500 text-xl"></i>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-slate-800">Company Registration</h3>
+                        <p class="text-[11px] text-slate-400 uppercase font-bold tracking-tight">Trade License / Incorporation</p>
+                    </div>
+                    
+                    <div class="pt-2">
+                        {% if docs.registration %}
+                            <div class="flex items-center justify-between bg-slate-50 p-3 rounded-xl mb-3">
+                                <span class="text-xs font-medium text-slate-600 truncate max-w-[150px]">{{ docs.registration.name|cut:'recruter_docs/registration/' }}</span>
+                                <a href="{{ docs.registration.url }}" target="_blank" class="text-blue-600 text-[10px] font-bold hover:underline">View</a>
+                            </div>
+                        {% endif %}
+                        {% render_field form.registration class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-purple-50 file:text-purple-700 hover:file:bg-purple-100 cursor-pointer" %}
+                    </div>
+                </div>
+
+                <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-4">
+                    <div class="flex justify-between items-start">
+                        <div class="w-12 h-12 bg-amber-50 text-amber-600 rounded-2xl flex items-center justify-center">
+                            <i class="fa-solid fa-address-card text-xl"></i>
+                        </div>
+                        {% if docs.pan_verified %}
+                            <i class="fa-solid fa-circle-check text-emerald-500 text-xl"></i>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-slate-800">Business PAN</h3>
+                        <p class="text-[11px] text-slate-400 uppercase font-bold tracking-tight">Permanent Account Number</p>
+                    </div>
+                    
+                    <div class="pt-2">
+                        {% if docs.pan_card %}
+                            <div class="flex items-center justify-between bg-slate-50 p-3 rounded-xl mb-3">
+                                <span class="text-xs font-medium text-slate-600 truncate max-w-[150px]">{{ docs.pan_card.name|cut:'recruter_docs/pan/' }}</span>
+                                <a href="{{ docs.pan_card.url }}" target="_blank" class="text-blue-600 text-[10px] font-bold hover:underline">View</a>
+                            </div>
+                        {% endif %}
+                        {% render_field form.pan_card class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-amber-50 file:text-amber-700 hover:file:bg-amber-100 cursor-pointer" %}
+                    </div>
+                </div>
+
+                <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-4">
+                    <div class="flex justify-between items-start">
+                        <div class="w-12 h-12 bg-rose-50 text-rose-600 rounded-2xl flex items-center justify-center">
+                            <i class="fa-solid fa-location-dot text-xl"></i>
+                        </div>
+                        {% if docs.address_proof_verified %}
+                            <i class="fa-solid fa-circle-check text-emerald-500 text-xl"></i>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-slate-800">Address Proof</h3>
+                        <p class="text-[11px] text-slate-400 uppercase font-bold tracking-tight">Utility Bill / Lease Agreement</p>
+                    </div>
+                    
+                    <div class="pt-2">
+                        {% if docs.address_proof %}
+                            <div class="flex items-center justify-between bg-slate-50 p-3 rounded-xl mb-3">
+                                <span class="text-xs font-medium text-slate-600 truncate max-w-[150px]">{{ docs.address_proof.name|cut:'recruter_docs/address_proof/' }}</span>
+                                <a href="{{ docs.address_proof.url }}" target="_blank" class="text-blue-600 text-[10px] font-bold hover:underline">View</a>
+                            </div>
+                        {% endif %}
+                        {% render_field form.address_proof class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-rose-50 file:text-rose-700 hover:file:bg-rose-100 cursor-pointer" %}
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="flex justify-center pt-6">
+                <button type="submit" class="bg-slate-900 text-white px-12 py-4 rounded-2xl font-bold hover:bg-slate-800 transition shadow-xl flex items-center gap-3">
+                    <i class="fa-solid fa-cloud-arrow-up"></i> Upload Documents for Review
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

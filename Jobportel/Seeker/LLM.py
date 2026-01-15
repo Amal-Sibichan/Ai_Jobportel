@@ -7,6 +7,7 @@ api_key = os.getenv("GROQ_API_KEY")
 client = Groq(
     api_key=api_key,
 )
+
 def extract_skills_llm(resume_text):
     prompt =  f"""
 You are an ATS analyzer.

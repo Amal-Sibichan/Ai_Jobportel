@@ -2,10 +2,14 @@ from django.shortcuts import render,redirect
 from django.http import HttpResponse
 from django.contrib import messages
 from Seeker.models import seeker
+from recruiter.models import Recruter
 from .forms import login_form, register
 from django.contrib.auth.models import User
 from django.contrib.auth import login
 from django.contrib.auth import logout
+from django.shortcuts import redirect
+from django.shortcuts import redirect
+
 # Create your views here.
 def login_user(request):
     if request.method == 'POST':
@@ -13,9 +17,12 @@ def login_user(request):
         if form.is_valid():
             user = form.cleaned_data['user']
             login(request,user)
-            seeker_obj = seeker.objects.get(user=user)
-            messages.success(request, 'Login successful!')
-            return render(request,'main/home.html',{'seeker':seeker_obj})
+            if hasattr(user,"recruter"):
+                messages.success(request, 'Login successful!')
+                return redirect('recruiter:recruter_page')
+            elif hasattr(user,"seeker"):
+                messages.success(request, 'Login successful!')
+                return redirect('seeker:seeker_page')
     else:
         form = login_form()
 
@@ -43,8 +50,7 @@ def register_user(request):
             if role == 'job_seeker':
                 seeker.objects.create(user=user)
             elif role == 'recruiter':
-                # Recruiter.objects.create(user=user)
-                return HttpResponse(f"Registered: {name} - {email}-{role}-{password}")
+                Recruter.objects.create(user=user)
             return redirect('accounts:login')
     else:
         form = register()

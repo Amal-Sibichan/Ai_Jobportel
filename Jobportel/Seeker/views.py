@@ -1,5 +1,5 @@
 from django.core.checks.messages import Info
-from django.shortcuts import render
+from django.shortcuts import redirect, render
 import json
 from django.http import JsonResponse
 from django.http import HttpResponse
@@ -11,8 +11,10 @@ from .forms import profileupdateform,upload_resume
 from .utils import extract,entity_score_spacy,atscore,pool_score,semantic_similarity,jaccard_skill_score,generate_vector
 from .LLM import extract_skills_llm
 # Create your views here.
-def user_dash(request):
-    return HttpResponse("user dash")
+def seeker_home(request):
+    seeker_obj = seeker.objects.get(user=request.user)
+
+    return render(request,'main/home.html',{'seeker':seeker_obj})
 @login_required
 def profile(request):
     user=request.user
@@ -130,6 +132,7 @@ def Resume_upload(request):
             ats_score=atscore(resume_info)
             entity_score=entity_score_spacy(res_text) 
             skill_list=resume_info.get('skills', [])  
-            new_res = resume.objects.create(resume=res,seeker=user_res,resume_vector=vector_Emp,resume_text=res_text,ats_score=ats_score,semantic_score=entity_score,skills=skill_list)
+            
+            new_res = resume.objects.create(resume=res,seeker=user_res,resume_vector=vector_Emp,resume_text=res_text,ats_score=ats_score,entity_score=entity_score,skills=skill_list)
             new_res.save()
             return HttpResponse("Resume Uploaded")

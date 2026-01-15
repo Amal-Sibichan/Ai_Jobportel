@@ -45,7 +45,7 @@ class register(forms.Form):
         return cleaned_data
 
 class login_form(forms.Form):
-    role = forms.CharField(required=True)
+    # role = forms.CharField(required=True)
     email = forms.EmailField(required=True)
     password = forms.CharField(widget=forms.PasswordInput, required=True)
 
@@ -53,19 +53,19 @@ class login_form(forms.Form):
         cleaned_data = super().clean()
         email = cleaned_data.get('email')
         password = cleaned_data.get('password')
-        role = cleaned_data.get('role')
+        # role = cleaned_data.get('role')
 
-        if not email or not password or not role:
+        if not email or not password :
             return cleaned_data
 
-        user = None
+        # user = None
 
-        if role == 'job_seeker':
-            user = authenticate(username=email, password=password)
+        # if role == 'job_seeker':
+        user = authenticate(username=email, password=password)
         # elif role == 'recruiter':
         #     user = Recruter.objects.filter(email=email, password=password).first()
-        else:
-            raise ValidationError("Invalid role selected")
+        # else:
+        #     raise ValidationError("Invalid role selected")
 
         if user is None:
             raise ValidationError("Invalid email or password")

@@ -1,0 +1,140 @@
+{% extends 'main/index.html' %}
+
+{% block content %}
+<div class="min-h-screen bg-slate-50 py-12 px-4">
+    <div class="max-w-5xl mx-auto">
+        
+        <div class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden mb-8">
+            <div class="h-32 w-full bg-gradient-to-r from-blue-600 to-indigo-700"></div>
+            
+            <div class="px-8 pb-8">
+                <div class="flex flex-col md:flex-row items-center md:items-end -mt-12 gap-6">
+                    <div class="relative">
+                        <div class="w-32 h-32 rounded-3xl overflow-hidden bg-white border-4 border-white shadow-lg flex items-center justify-center">
+                            {% if recruter.logo %}
+                                <img src="{{ recruter.logo.url }}" class="w-full h-full object-cover">
+                            {% else %}
+                                <img src="https://ui-avatars.com/api/?name={{ recruter.company_name|default:'C' }}&size=128&background=f1f5f9&color=64748b" class="w-full h-full">
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="flex-1 text-center md:text-left">
+                        <h1 class="text-3xl font-extrabold text-slate-800">{{ recruter.company_name }}</h1>
+                        <div class="flex flex-wrap justify-center md:justify-start gap-y-2 gap-x-4 mt-2 text-slate-500 font-medium text-sm">
+                            <span class="flex items-center gap-1.5">
+                                <i class="fa-solid fa-layer-group text-blue-500"></i> {{ recruter.industry }}
+                            </span>
+                            <span class="flex items-center gap-1.5">
+                                <i class="fa-solid fa-location-dot text-blue-500"></i> {{ recruter.address|default:"Location not set"|truncatechars:30 }}
+                            </span>
+                            <span class="flex items-center gap-1.5 text-emerald-600">
+                                <i class="fa-solid fa-circle-check"></i> {{ recruter.approval_status|title }}
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="pb-2">
+                        <a href="{% url 'recruiter:profile_update' %}" class="flex items-center gap-2 bg-slate-100 text-slate-700 px-6 py-3 rounded-2xl font-bold hover:bg-slate-200 transition text-sm">
+                            <i class="fa-solid fa-pen-to-square"></i> Edit Profile
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            
+            <div class="md:col-span-2 space-y-8">
+                <div class="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm">
+                    <h3 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+                        <i class="fa-solid fa-circle-info text-blue-600"></i> About Us
+                    </h3>
+                    <p class="text-slate-600 leading-relaxed whitespace-pre-line">
+                        {{ recruter.decription|default:"No description provided yet." }}
+                    </p>
+                </div>
+
+                <div class="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-lg font-bold text-slate-800">Recent Job Openings</h3>
+                        <span class="text-xs font-bold text-blue-600 bg-blue-50 px-3 py-1 rounded-full">3 Active Jobs</span>
+                    </div>
+                    
+                    <div class="space-y-4">
+                        <div class="p-4 rounded-2xl border border-slate-100 hover:border-blue-200 hover:bg-blue-50/30 transition cursor-pointer group">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <h4 class="font-bold text-slate-700 group-hover:text-blue-600 transition">Senior Backend Developer</h4>
+                                    <p class="text-xs text-slate-500 mt-1">Full-time • Remote • $80k - $120k</p>
+                                </div>
+                                <i class="fa-solid fa-arrow-right-long text-slate-300 group-hover:text-blue-500 group-hover:translate-x-1 transition"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="space-y-6">
+                <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm">
+                    <h3 class="font-bold text-slate-800 text-sm mb-6 uppercase tracking-widest">Company Overview</h3>
+                    
+                    <div class="space-y-5">
+                        <div class="flex items-center gap-4">
+                            <div class="w-10 h-10 bg-slate-50 rounded-xl flex items-center justify-center text-blue-600">
+                                <i class="fa-solid fa-users"></i>
+                            </div>
+                            <div>
+                                <p class="text-[10px] font-bold text-slate-400 uppercase">Size</p>
+                                <p class="text-sm font-bold text-slate-700">{{ recruter.get_size_display }}</p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-4">
+                            <div class="w-10 h-10 bg-slate-50 rounded-xl flex items-center justify-center text-blue-600">
+                                <i class="fa-solid fa-sitemap"></i>
+                            </div>
+                            <div>
+                                <p class="text-[10px] font-bold text-slate-400 uppercase">Org Type</p>
+                                <p class="text-sm font-bold text-slate-700">{{ recruter.get_Organization_type_display }}</p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-4">
+                            <div class="w-10 h-10 bg-slate-50 rounded-xl flex items-center justify-center text-blue-600">
+                                <i class="fa-solid fa-calendar-day"></i>
+                            </div>
+                            <div>
+                                <p class="text-[10px] font-bold text-slate-400 uppercase">Joined On</p>
+                                <p class="text-sm font-bold text-slate-700">{{ recruter.created_at|date:"F Y" }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm">
+                    <h3 class="font-bold text-slate-800 text-sm mb-6 uppercase tracking-widest">Contact Info</h3>
+                    <div class="space-y-4">
+                        {% if recruter.website %}
+                        <a href="{{ recruter.website }}" target="_blank" class="flex items-center justify-between p-3 rounded-2xl bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white transition group">
+                            <span class="text-sm font-bold">Visit Website</span>
+                            <i class="fa-solid fa-arrow-up-right-from-square text-xs"></i>
+                        </a>
+                        {% endif %}
+                        
+                        <div class="p-4 rounded-2xl bg-slate-50 border border-slate-100">
+                            <p class="text-[10px] font-bold text-slate-400 uppercase mb-1">Company Email</p>
+                            <p class="text-sm font-bold text-slate-700 truncate">{{ recruter.company_email|default:"N/A" }}</p>
+                        </div>
+
+                        <div class="p-4 rounded-2xl bg-slate-50 border border-slate-100">
+                            <p class="text-[10px] font-bold text-slate-400 uppercase mb-1">Phone</p>
+                            <p class="text-sm font-bold text-slate-700">{{ recruter.phone|default:"N/A" }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

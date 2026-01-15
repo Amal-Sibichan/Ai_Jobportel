@@ -54,7 +54,7 @@
             </div>
 
             <div class="flex gap-3 mb-2">
-                <button onclick="window.location.href='{% url 'profileupdate' %}'" class="px-6 py-2.5 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition shadow-lg shadow-blue-100">
+                <button onclick="window.location.href='{% url 'seeker:profileupdate' %}'" class="px-6 py-2.5 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition shadow-lg shadow-blue-100">
                     Edit Profile
                 </button>
             </div>
@@ -113,7 +113,7 @@
             <div class="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm">
     <h3 class="font-bold text-slate-800 mb-6 text-lg text-center">Resume Management</h3>
     
-    <form action="{% url 'Resume_upload' %}" method="POST" enctype="multipart/form-data" id="resume-form" class="flex flex-col items-center justify-center space-y-4">
+    <form action="{% url 'seeker:Resume_upload' %}" method="POST" enctype="multipart/form-data" id="resume-form" class="flex flex-col items-center justify-center space-y-4">
         {% csrf_token %}
         
         {% if user.seeker.resume %}
@@ -254,7 +254,7 @@
         const skillName = input.value;
         
         try {
-            const response = await fetch('{% url "add_skill" %}', {
+            const response = await fetch('{% url "seeker:add_skill" %}', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
