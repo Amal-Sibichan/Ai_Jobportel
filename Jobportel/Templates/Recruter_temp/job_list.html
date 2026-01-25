@@ -1,0 +1,109 @@
+{% extends 'main/index.html' %}
+
+{% block content %}
+<div class="min-h-screen bg-slate-50 py-12 px-4">
+    <div class="max-w-6xl mx-auto">
+        
+        <div class="flex flex-col md:flex-row gap-8">
+            
+            <div class="w-full md:w-1/4">
+                <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm sticky top-8">
+                    <div class="flex items-center gap-2 mb-6 text-slate-800">
+                        <i class="fa-solid fa-filter text-blue-600"></i>
+                        <h3 class="font-bold text-sm uppercase tracking-widest">Filter Posts</h3>
+                    </div>
+
+                    <form method="GET" class="space-y-6">
+                        <div class="space-y-2">
+                            <label class="text-[10px] font-bold text-slate-400 uppercase ml-1">Job Status</label>
+                            <select name="status" class="w-full px-4 py-2.5 rounded-xl bg-slate-50 border-none text-sm focus:ring-2 focus:ring-blue-500">
+                                <option value="">All Status</option>
+                                <option value="active" {% if status_val == 'active' %}selected{% endif %}>Active Only</option>
+                                <option value="expired" {% if status_val == 'expired' %}selected{% endif %}>Expired Only</option>
+                            </select>
+                        </div>
+
+                        <div class="space-y-2">
+                            <label class="text-[10px] font-bold text-slate-400 uppercase ml-1">Posted Since</label>
+                            <input type="date" name="created_after" value="{{ created_val }}"
+                                   class="w-full px-4 py-2.5 rounded-xl bg-slate-50 border-none text-sm focus:ring-2 focus:ring-blue-500">
+                        </div>
+
+                        <div class="space-y-2">
+                            <label class="text-[10px] font-bold text-slate-400 uppercase ml-1">Deadline Before</label>
+                            <input type="date" name="due_before" value="{{ due_val }}"
+                                   class="w-full px-4 py-2.5 rounded-xl bg-slate-50 border-none text-sm focus:ring-2 focus:ring-blue-500">
+                        </div>
+
+                        <div class="pt-4 space-y-3">
+                            <button type="submit" class="w-full bg-blue-600 text-white py-3 rounded-2xl font-bold text-xs hover:bg-blue-700 transition shadow-lg shadow-blue-100">
+                                Apply Filters
+                            </button>
+                            <a href="{% url 'recruiter:job_list' %}" class="block text-center text-[10px] font-bold text-slate-400 uppercase hover:text-rose-500 transition">
+                                Reset Filters
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="w-full md:w-3/4 space-y-6">
+                <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm flex items-center justify-between">
+                    <div>
+                        <h2 class="text-xl font-bold text-slate-800">Recent Postings</h2>
+                        <p class="text-xs text-slate-500">Showing <span class="font-bold text-blue-600">{{ jobs.count }}</span> results</p>
+                    </div>
+                    <a href="{% url 'recruiter:post_job' %}" class="bg-slate-900 text-white px-5 py-2.5 rounded-xl font-bold text-xs hover:bg-slate-800 transition">
+                        + New Post
+                    </a>
+                </div>
+
+                <div class="space-y-4">
+                    {% for j in jobs %}
+                    <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm hover:border-blue-200 transition group relative overflow-hidden">
+                        <div class="flex items-start justify-between">
+                            <div class="flex items-center gap-5">
+                                <div class="w-14 h-14 bg-slate-50 rounded-2xl flex items-center justify-center text-slate-300 group-hover:bg-blue-50 group-hover:text-blue-500 transition">
+                                    <i class="fa-solid fa-briefcase text-2xl"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-bold text-slate-800 group-hover:text-blue-600 transition">{{ j.title }}</h3>
+                                    <div class="flex items-center gap-4 mt-1">
+                                        <span class="text-[10px] text-slate-400 font-bold uppercase tracking-tight">
+                                            <i class="fa-solid fa-calendar-plus mr-1"></i> Posted {{ j.created_at|date:"M d" }}
+                                        </span>
+                                        <span class="text-[10px] text-slate-400 font-bold uppercase tracking-tight">
+                                            <i class="fa-solid fa-hourglass-half mr-1 text-amber-500"></i> Due {{ j.due|date:"M d" }}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="text-right">
+                                {% if j.due >= today %}
+                                    <span class="px-3 py-1 bg-emerald-50 text-emerald-600 text-[9px] font-bold uppercase rounded-full border border-emerald-100">Active</span>
+                                {% else %}
+                                    <span class="px-3 py-1 bg-rose-50 text-rose-600 text-[9px] font-bold uppercase rounded-full border border-rose-100">Expired</span>
+                                {% endif %}
+                                <div class="mt-4 flex gap-2 justify-end opacity-0 group-hover:opacity-100 transition">
+                                    
+                                    <a href="#" class="text-slate-400 hover:text-blue-600"><i class="fa-solid fa-pen-to-square"></i></a>
+                                    <a href="#" class="text-slate-400 hover:text-rose-500"><i class="fa-solid fa-trash-can"></i></a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="bg-white p-20 rounded-3xl border border-dashed border-slate-200 text-center">
+                        <i class="fa-solid fa-filter-circle-xmark text-slate-200 text-4xl mb-4"></i>
+                        <h4 class="text-slate-800 font-bold">No jobs match your filters</h4>
+                        <p class="text-slate-500 text-sm">Try adjusting your date range or status selection.</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}

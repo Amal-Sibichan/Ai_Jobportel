@@ -10,11 +10,14 @@ from .models import Experience, seeker,skill,Education,resume
 from .forms import profileupdateform,upload_resume
 from .utils import extract,entity_score_spacy,atscore,pool_score,semantic_similarity,jaccard_skill_score,generate_vector
 from .LLM import extract_skills_llm
+from recruiter.models import job
 # Create your views here.
+@login_required
 def seeker_home(request):
     seeker_obj = seeker.objects.get(user=request.user)
 
-    return render(request,'main/home.html',{'seeker':seeker_obj})
+    jobs = job.objects.select_related('recruter').all()
+    return render(request,'main/home.html',{'seeker':seeker_obj,'jobs':jobs})
 @login_required
 def profile(request):
     user=request.user

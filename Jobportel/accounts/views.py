@@ -23,6 +23,9 @@ def login_user(request):
             elif hasattr(user,"seeker"):
                 messages.success(request, 'Login successful!')
                 return redirect('seeker:seeker_page')
+            elif user.is_staff:
+                messages.success(request, 'Login successful!')
+                return redirect('Superuser:admin_home')
     else:
         form = login_form()
 

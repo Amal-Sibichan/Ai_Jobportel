@@ -42,7 +42,8 @@ INSTALLED_APPS = [
     'Seeker',
     'accounts',
     'main',
-    'recruiter'
+    'recruiter',
+    'Superuser',
 ]
 
 MIDDLEWARE = [

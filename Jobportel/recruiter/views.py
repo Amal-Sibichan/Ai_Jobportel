@@ -1,11 +1,13 @@
 from django.shortcuts import redirect, render
-from recruiter.models import Recruter,documents
+from recruiter.models import Recruter,documents,job
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required,user_passes_test
 from django.views.decorators.http import require_POST, require_http_methods
-from .forms import recruter_form,DocumentUploadForm
+from Seeker.utils import extract,entity_score_spacy,atscore,pool_score,semantic_similarity,jaccard_skill_score,generate_vector
+from .forms import recruter_form,DocumentUploadForm,job_form
 from django.http import HttpResponse
 from django.contrib import messages
+import datetime
 
 def is_recruter(user):
     return hasattr(user, 'recruter')
@@ -14,14 +16,16 @@ def is_recruter(user):
 @user_passes_test(is_recruter, login_url='/access-denied/')
 def recruter_home(request):
     emp_obj=Recruter.objects.get(user=request.user)
-    return render(request,'Recruter_temp/recruter_home.html',{'employer':emp_obj})
+    jobs=job.objects.filter(recruter=emp_obj).order_by('-created_at')[:5]
+    today=datetime.date.today()
+    return render(request,'Recruter_temp/recruter_home.html',{'employer':emp_obj,'jobs':jobs,'today':today})
 
 @login_required
 @user_passes_test(is_recruter, login_url='/access-denied/')
 def recruter_profile(request):
     user=request.user
-    employer=getattr(user,"Recruter",None)
-    return render(request,'Recruter_temp/recruter_profile.html',{"user":user,"employer":employer})
+    employer=getattr(user,"recruter",None)
+    return render(request,'Recruter_temp/recruter_profile.html',{"user":user,"recruter":employer})
 
 # def recruter_update(request):
 #     user=request.user
@@ -31,6 +35,7 @@ def recruter_profile(request):
 @user_passes_test(is_recruter, login_url='/access-denied/')
 def recruter_update(request):
     current_recruter=Recruter.objects.get(user=request.user)
+    docs, created = documents.objects.get_or_create(recruter=current_recruter)
     if request.method == 'POST':
         form=recruter_form(request.POST)
         if form.is_valid():
@@ -46,6 +51,7 @@ def recruter_update(request):
             current_recruter.address = form.cleaned_data['address']
             current_recruter.decription = form.cleaned_data['decription']
             current_recruter.industry = form.cleaned_data['industry']
+            current_recruter.size = form.cleaned_data['size']
             current_recruter.Organization_type = form.cleaned_data['Organization_type']
             current_recruter.save()
             messages.success(request, 'Login successful!')
@@ -66,7 +72,7 @@ def recruter_update(request):
             'industry': current_recruter.industry,
             'Organization_type': current_recruter.Organization_type,
             })
-    return render(request,'Recruter_temp/profile_update.html',{'form':form,'employer':current_recruter})
+    return render(request,'Recruter_temp/profile_update.html',{'form':form,'employer':current_recruter,'docs':docs})
 
 
 @login_required
@@ -88,3 +94,65 @@ def upload_docs(request):
         form=DocumentUploadForm()
     return render(request, 'recruter_temp/upload_docs.html',{'form':form,'docs':docs})
     
+@login_required
+@user_passes_test(is_recruter, login_url='/access-denied/')
+def post_job(request):
+    current_recruter=Recruter.objects.get(user=request.user)
+    docs=documents.objects.get(recruter=current_recruter)
+    if not current_recruter.is_profile_complete():
+        messages.warning(request, "Please fill in all company details.")
+        return redirect('recruiter:profile_update')
+    if not docs.is_documents_complete():
+        messages.warning(request, "Please upload all required documents.")
+        return redirect('recruiter:upload_docs')
+    
+    if current_recruter.approval_status != "APPROVED":
+        messages.warning(request, "Your profile is not approved yet.")
+        return redirect('recruiter:profile_update')
+    
+    if request.method == 'POST':
+        form = job_form(request.POST)
+        if form.is_valid():
+            title = form.cleaned_data['title']
+            discription = form.cleaned_data['discription']
+            education = form.cleaned_data['education']
+            experience = form.cleaned_data['experience']
+            salary = form.cleaned_data['salary']
+            responsablity = form.cleaned_data['responsablity']
+            due = form.cleaned_data['due']
+            skills_list = [s.strip() for s in form.cleaned_data['skills'].split(',')]
+            job_text = f"""
+                        Job Title: {title}
+
+                        Job Description:
+                        {discription}
+
+                        Required Skills:
+                        {skills_list}
+
+                        Education:
+                        {education}
+
+                        Experience:
+                        {experience}
+
+                        responsablity:
+                        {responsablity}
+                        """
+            job_vector = generate_vector(job_text)
+            new_job = job.objects.create(title=title, discription=discription, skills=skills_list, education=education, experience=experience, salary=salary, responsablity=responsablity,job_vector=job_vector, due=due, recruter=current_recruter)
+            new_job.save()
+            return HttpResponse("Job Posted")
+    else:
+        form = job_form()
+    
+
+    return render(request, 'recruter_temp/Post_job.html', {'form': form})
+
+
+def job_list(request):
+    current_recruter=Recruter.objects.get(user=request.user)
+    jobs = job.objects.filter(recruter=current_recruter)
+    count=jobs.count()
+    today=datetime.date.today()
+    return render(request, 'recruter_temp/job_list.html', {'jobs': jobs,'count':count,'today':today})

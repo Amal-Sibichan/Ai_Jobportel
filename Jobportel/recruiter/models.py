@@ -22,6 +22,20 @@ class Recruter(models.Model):
     sub_status = models.CharField(max_length=20,choices=[("FREE","Free"),("PENDING_PAYMENT","Pending_payment"),("ACTIVE","Active"),("EXPIRED","Expired")],default="FREE")
     sub_due = models.DateField(null=True,blank=True)
     created_at = models.DateField(auto_now_add=True) 
+    def is_profile_complete(self):
+        required_fields = [
+            self.company_name, 
+            self.company_email, 
+            self.website, 
+            self.phone, 
+            self.address, 
+            self.industry,
+            self.Organization_type,
+            self.size,
+            self.decription,
+        ]
+        return all(required_fields)
+
     def __str__(self):
         return self.company_name
 
@@ -40,6 +54,15 @@ class documents(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
+    def is_documents_complete(self):
+        required_fields=[
+            self.gst_certificate,
+            self.registration,
+            self.pan_card,
+            self.address_proof,
+        ]
+        return all(required_fields)
+
     def all_documents_verified(self):
         return self.gst_verified and self.registration_verified and self.pan_verified and self.address_proof_verified
 
@@ -50,5 +73,25 @@ class documents(models.Model):
     
 
     
+class job(models.Model):
+    recruter = models.ForeignKey(Recruter,on_delete=models.CASCADE,related_name='jobs')
+    title = models.CharField(max_length=50,null=True,blank=True)
+    discription = models.TextField(null=True,blank=True)
+    skills = models.JSONField(null=True,blank=True)
+    education = models.CharField(max_length=50,null=True,blank=True)
+    experience = models.CharField(max_length=20,choices=[("0-1","0-1 Years"),("2-5","2-5 Years"),("5+","5+ Years")])
+    salary = models.CharField(null=True,blank=True)
+    responsablity = models.TextField(null=True,blank=True)
+    job_vector = VectorField(dimensions=384,null=True,blank=True)
+    due = models.DateField(null=True,blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
 
+
+    def __str__(self):
+        return self.recruter.company_name
+    
+
+
+
+    
 

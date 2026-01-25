@@ -7,7 +7,7 @@
             <h1 class="text-2xl font-bold text-slate-800">Hello {{ user.first_name}}</h1>
             <p class="text-slate-500 text-sm">Welcome back! Here's what's happening with your listings.</p>
         </div>
-        <button class="bg-blue-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-blue-700 transition shadow-lg shadow-blue-100 flex items-center gap-2">
+        <button onclick="window.location.href='{% url 'recruiter:post_job' %}'" class="bg-blue-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-blue-700 transition shadow-lg shadow-blue-100 flex items-center gap-2">
             <i class="fa-solid fa-plus text-sm"></i> Post a New Job
         </button>
     </div>
@@ -39,7 +39,7 @@
     <div class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
         <div class="p-6 border-b border-slate-100 flex justify-between items-center">
             <h3 class="font-bold text-slate-800 text-lg">Active Job Listings</h3>
-            <a href="#" class="text-blue-600 text-xs font-bold hover:underline">View All</a>
+            <a href="{% url 'recruiter:job_list' %}" class="text-blue-600 text-xs font-bold hover:underline">View All</a>
         </div>
         <div class="overflow-x-auto">
             <table class="w-full text-left">
@@ -52,25 +52,31 @@
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100">
+                    {% for job in jobs %}
                     <tr class="hover:bg-slate-50 transition">
                         <td class="px-6 py-4">
-                            <p class="font-bold text-slate-700 text-sm">Senior Python Developer</p>
+                            <p class="font-bold text-slate-700 text-sm">{{ job.title }}</p>
                             <p class="text-xs text-slate-400">Posted 2 days ago</p>
                         </td>
                         <td class="px-6 py-4">
                             <div class="flex -space-x-2">
                                 <img src="https://ui-avatars.com/api/?name=A" class="w-7 h-7 rounded-full border-2 border-white">
                                 <img src="https://ui-avatars.com/api/?name=B" class="w-7 h-7 rounded-full border-2 border-white">
-                                <div class="w-7 h-7 rounded-full border-2 border-white bg-slate-100 flex items-center justify-center text-[10px] font-bold">+24</div>
+                                <div class="w-7 h-7 rounded-full border-2 border-white bg-slate-100 flex items-center justify-center text-[10px] font-bold">{{ job.applicants.count }}</div>
                             </div>
                         </td>
                         <td class="px-6 py-4">
+                            {% if job.due >= today %}
                             <span class="px-3 py-1 bg-emerald-100 text-emerald-700 rounded-full text-[10px] font-bold uppercase">Active</span>
+                            {% else %}
+                            <span class="px-3 py-1 bg-red-100 text-red-700 rounded-full text-[10px] font-bold uppercase">Inactive</span>
+                            {% endif %}
                         </td>
                         <td class="px-6 py-4 text-right">
                             <button class="text-slate-400 hover:text-blue-600 transition"><i class="fa-solid fa-ellipsis-vertical"></i></button>
                         </td>
                     </tr>
+                    {% endfor %}
                 </tbody>
             </table>
         </div>

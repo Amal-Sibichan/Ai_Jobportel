@@ -1,0 +1,138 @@
+{% extends 'main/index.html' %}
+
+{% block content %}
+<div class="p-6 bg-slate-50 min-h-screen">
+    <div class="mb-8 flex justify-between items-center">
+        <div class="flex items-center gap-4">
+            <a href="{% url 'Superuser:admin_home' %}" class="text-slate-400 hover:text-blue-600 transition">
+                <i class="fa-solid fa-circle-left text-2xl"></i>
+            </a>
+            <h1 class="text-2xl font-bold text-slate-800">Employer Verification Detail</h1>
+        </div>
+    </div>
+
+    <form method="POST" action="{% url 'Superuser:verification' employer.id %}" class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        {% csrf_token %}
+        
+        <div class="lg:col-span-4 space-y-6">
+            <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm">
+                <div class="flex flex-col items-center text-center mb-6">
+                    <div class="w-24 h-24 bg-slate-100 rounded-2xl overflow-hidden mb-4 border border-slate-100">
+                        {% if employer.logo %}<img src="{{ employer.logo.url }}" class="w-full h-full object-cover">{% endif %}
+                    </div>
+                    <h2 class="text-xl font-bold text-slate-800">{{ employer.company_name }}</h2>
+                    <span class="text-xs font-bold text-blue-600 bg-blue-50 px-3 py-1 rounded-full mt-2">{{ employer.industry }}</span>
+                </div>
+
+                <div class="space-y-4 pt-4 border-t border-slate-50">
+                    <div>
+                        <p class="text-[10px] font-bold text-slate-400 uppercase">Description</p>
+                        <p class="text-xs text-slate-600 leading-relaxed">{{ employer.decription }}</p>
+                    </div>
+                    <div>
+                        <p class="text-[10px] font-bold text-slate-400 uppercase">Website</p>
+                        <a href="{{ employer.website }}" class="text-xs text-blue-500 hover:underline">{{ employer.website }}</a>
+                    </div>
+                    <div>
+                        <p class="text-[10px] font-bold text-slate-400 uppercase">Contact Email</p>
+                        <p class="text-xs font-bold text-slate-700">{{ employer.company_email }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="lg:col-span-8 space-y-6">
+            <div class="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm">
+                <h3 class="font-bold text-slate-800 mb-6 flex items-center gap-2">
+                    <i class="fa-solid fa-file-shield text-blue-600"></i> Review Documents
+                </h3>
+
+                <div class="space-y-6">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100 gap-4">
+                        <div class="flex items-center gap-4">
+                            <div class="w-10 h-10 bg-white rounded-lg flex items-center justify-center shadow-sm">
+                                <i class="fa-solid fa-file-invoice text-slate-400"></i>
+                            </div>
+                            <div>
+                                <h4 class="text-sm font-bold text-slate-700">GST Certificate</h4>
+                                {% if docs.gst_certificate %}
+                                    <a href="{{ docs.gst_certificate.url }}" target="_blank" class="text-[10px] text-blue-600 font-bold hover:underline">View Document <i class="fa-solid fa-external-link text-[8px]"></i></a>
+                                {% else %}
+                                    <span class="text-[10px] text-rose-500 font-bold">Not Uploaded</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" name="gst_verified" class="sr-only peer" {% if docs.gst_verified %}checked{% endif %}>
+                            <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
+                            <span class="ml-3 text-xs font-bold text-slate-500 peer-checked:text-emerald-600">Verified</span>
+                        </label>
+                    </div>
+
+                    <div class="flex flex-col md:flex-row md:items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100 gap-4">
+                        <div class="flex items-center gap-4">
+                            <div class="w-10 h-10 bg-white rounded-lg flex items-center justify-center shadow-sm">
+                                <i class="fa-solid fa-id-card text-slate-400"></i>
+                            </div>
+                            <div>
+                                <h4 class="text-sm font-bold text-slate-700">Registration Document</h4>
+                                {% if docs.registration %}
+                                    <a href="{{ docs.registration.url }}" target="_blank" class="text-[10px] text-blue-600 font-bold hover:underline">View Document</a>
+                                {% else %}<span class="text-[10px] text-rose-500 font-bold">Not Uploaded</span>{% endif %}
+                            </div>
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" name="registration_verified" class="sr-only peer" {% if docs.registration_verified %}checked{% endif %}>
+                            <div class="w-11 h-6 bg-slate-200 rounded-full peer peer-checked:after:translate-x-full peer-checked:bg-emerald-500 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all"></div>
+                            <span class="ml-3 text-xs font-bold text-slate-500 peer-checked:text-emerald-600">Verified</span>
+                        </label>
+                    </div>
+
+                    <div class="flex flex-col md:flex-row md:items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100 gap-4">
+                        <div class="flex items-center gap-4">
+                            <div class="w-10 h-10 bg-white rounded-lg flex items-center justify-center shadow-sm">
+                                <i class="fa-solid fa-address-card text-slate-400"></i>
+                            </div>
+                            <div>
+                                <h4 class="text-sm font-bold text-slate-700">PAN Card</h4>
+                                {% if docs.pan_card %}
+                                    <a href="{{ docs.pan_card.url }}" target="_blank" class="text-[10px] text-blue-600 font-bold hover:underline">View Document</a>
+                                {% else %}<span class="text-[10px] text-rose-500 font-bold">Not Uploaded</span>{% endif %}
+                            </div>
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" name="pan_verified" class="sr-only peer" {% if docs.pan_verified %}checked{% endif %}>
+                            <div class="w-11 h-6 bg-slate-200 rounded-full peer peer-checked:after:translate-x-full peer-checked:bg-emerald-500 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all"></div>
+                            <span class="ml-3 text-xs font-bold text-slate-500 peer-checked:text-emerald-600">Verified</span>
+                        </label>
+                    </div>
+                    <div class="flex flex-col md:flex-row md:items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100 gap-4">
+                        <div class="flex items-center gap-4">
+                            <div class="w-10 h-10 bg-white rounded-lg flex items-center justify-center shadow-sm">
+                                <i class="fa-solid fa-address-card text-slate-400"></i>
+                            </div>
+                            <div>
+                                <h4 class="text-sm font-bold text-slate-700">Address Proof</h4>
+                                {% if docs.address_proof %}
+                                    <a href="{{ docs.address_proof.url }}" target="_blank" class="text-[10px] text-blue-600 font-bold hover:underline">View Document</a>
+                                {% else %}<span class="text-[10px] text-rose-500 font-bold">Not Uploaded</span>{% endif %}
+                            </div>
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" name="pan_verified" class="sr-only peer" {% if docs.address_proof_verified %}checked{% endif %}>
+                            <div class="w-11 h-6 bg-slate-200 rounded-full peer peer-checked:after:translate-x-full peer-checked:bg-emerald-500 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all"></div>
+                            <span class="ml-3 text-xs font-bold text-slate-500 peer-checked:text-emerald-600">Verified</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="mt-10 pt-6 border-t border-slate-100 flex justify-end">
+                    <button type="submit" class="bg-slate-900 text-white px-10 py-3 rounded-2xl font-bold hover:bg-slate-800 transition shadow-lg shadow-slate-200">
+                        Update Verification
+                    </button>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}

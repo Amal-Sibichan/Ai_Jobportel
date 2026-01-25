@@ -1,0 +1,94 @@
+{% extends 'main/index.html' %}
+{% load widget_tweaks %}
+
+{% block content %}
+<div class="min-h-screen bg-slate-50 py-12 px-4">
+    <div class="max-w-4xl mx-auto">
+        
+        <form method="POST" class="space-y-8">
+            {% csrf_token %}
+            
+            <div class="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm flex flex-col md:flex-row justify-between items-center gap-6">
+                <div>
+                    <h1 class="text-2xl font-bold text-slate-800">Post a New Job</h1>
+                    <p class="text-slate-500 text-sm">Fill in the details to find the perfect candidate.</p>
+                </div>
+                <button type="submit" class="bg-blue-600 text-white px-10 py-3 rounded-2xl font-bold hover:bg-blue-700 transition shadow-lg shadow-blue-100">
+                    Publish Job
+                </button>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="md:col-span-2 space-y-6">
+                    <div class="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm space-y-6">
+                        <div class="space-y-2">
+                            <label class="text-xs font-bold text-slate-400 uppercase">Job Title</label>
+                            {% render_field form.title class="w-full px-4 py-3 rounded-xl bg-slate-50 border-none focus:ring-2 focus:ring-blue-500 text-sm" placeholder="e.g. Python Developer" %}
+                        </div>
+
+                        <div class="space-y-2">
+                            <label class="text-xs font-bold text-slate-400 uppercase">Job Description</label>
+                            {% render_field form.discription class="w-full px-4 py-3 rounded-xl bg-slate-50 border-none focus:ring-2 focus:ring-blue-500 text-sm" placeholder="Describe the role..." %}
+                        </div>
+
+                        <div class="space-y-2">
+                            <label class="text-xs font-bold text-slate-400 uppercase">Key Responsibilities</label>
+                            {% render_field form.responsablity class="w-full px-4 py-3 rounded-xl bg-slate-50 border-none focus:ring-2 focus:ring-blue-500 text-sm" placeholder="What will they do daily?" %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="space-y-6">
+                    <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-4">
+                        <h3 class="font-bold text-slate-800 text-sm uppercase border-b pb-3">Requirements</h3>
+                        
+                        <div class="space-y-2">
+                            <label class="text-[10px] font-bold text-slate-400 uppercase">Experience</label>
+                            {% render_field form.experience class="w-full px-3 py-2 rounded-xl bg-slate-50 border-none text-sm" %}
+                        </div>
+
+                        <div class="space-y-2">
+                            <label class="text-[10px] font-bold text-slate-400 uppercase">Education</label>
+                            {% render_field form.education class="w-full px-3 py-2 rounded-xl bg-slate-50 border-none text-sm" placeholder="e.g. B.Tech / MCA" %}
+                        </div>
+
+                        <div class="space-y-2">
+                            <label class="text-[10px] font-bold text-slate-400 uppercase">Skills (Comma separated)</label>
+                            {% render_field form.skills class="w-full px-3 py-2 rounded-xl bg-slate-50 border-none text-sm" placeholder="Python, Django, AWS" %}
+                            {% if form.skills.errors %}
+                                <p class="text-red-600 text-sm mt-1">
+                                    {{ form.skills.errors.0 }}
+                                </p>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-4">
+                        <h3 class="font-bold text-slate-800 text-sm uppercase border-b pb-3">Details</h3>
+                        
+                        <div class="space-y-2">
+                            <label class="text-[10px] font-bold text-slate-400 uppercase">Salary Range</label>
+                            {% render_field form.salary class="w-full px-3 py-2 rounded-xl bg-slate-50 border-none text-sm" placeholder="e.g. 10 LPA" %}
+                            {% if form.salary.errors %}
+                                <p class="text-red-600 text-sm mt-1">
+                                    {{ form.salary.errors.0 }}
+                                </p>
+                            {% endif %}
+                        </div>
+
+                        <div class="space-y-2">
+                            <label class="text-[10px] font-bold text-slate-400 uppercase">Application Due Date</label>
+                            {% render_field form.due class="w-full px-3 py-2 rounded-xl bg-slate-50 border-none text-sm" %}
+                            {% if form.due.errors %}
+                                <p class="text-red-600 text-sm mt-1">
+                                    {{ form.due.errors.0 }}
+                                </p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

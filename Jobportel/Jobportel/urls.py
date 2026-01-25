@@ -26,5 +26,6 @@ urlpatterns = [
     path('user/',include('Seeker.urls',namespace='seeker')),
     path('accounts/', include('accounts.urls')),
     path('recruiter/', include('recruiter.urls', namespace='recruiter')),
+    path('Superuser/',include('Superuser.urls')),
 ]
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

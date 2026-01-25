@@ -4,6 +4,22 @@
 {% block content %}
 <div class="min-h-screen bg-slate-50 py-12 px-4">
     <div class="max-w-4xl mx-auto">
+        {% if not docs.is_documents_complete %}
+        <div class="bg-amber-50 border border-amber-200 p-4 rounded-3xl mb-8 flex flex-col md:flex-row items-center justify-between gap-4">
+            <div class="flex items-center gap-4">
+                <div class="w-12 h-12 bg-amber-100 text-amber-600 rounded-2xl flex items-center justify-center">
+                    <i class="fa-solid fa-file-shield text-xl"></i>
+                </div>
+                <div>
+                    <h4 class="text-sm font-bold text-slate-800">Action Required: Business Verification</h4>
+                    <p class="text-xs text-slate-500">Some of your documents are missing or pending verification.</p>
+                </div>
+            </div>
+            <a href="{% url 'recruiter:upload_docs' %}" class="bg-amber-600 text-white px-6 py-2.5 rounded-2xl font-bold hover:bg-amber-700 transition text-xs shadow-lg shadow-amber-200 flex items-center gap-2">
+                <i class="fa-solid fa-cloud-arrow-up"></i> Upload Documents
+            </a>
+        </div>
+        {% endif %}
         
         <form method="POST" enctype="multipart/form-data" class="space-y-8">
             {% csrf_token %}

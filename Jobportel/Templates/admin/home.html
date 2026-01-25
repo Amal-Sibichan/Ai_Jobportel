@@ -1,0 +1,139 @@
+{% extends 'main/index.html' %}
+
+{% block content %}
+<div class="p-4 md:p-8 bg-slate-50 min-h-screen">
+    
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm">
+            <div class="flex items-center gap-4">
+                <div class="w-12 h-12 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center">
+                    <i class="fa-solid fa-user-graduate text-xl"></i>
+                </div>
+                <div>
+                    <p class="text-slate-400 text-[10px] font-bold uppercase tracking-wider">Seekers</p>
+                    <h2 class="text-2xl font-bold text-slate-800">{{ total_seekers }}</h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm">
+            <div class="flex items-center gap-4">
+                <div class="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center">
+                    <i class="fa-solid fa-building text-xl"></i>
+                </div>
+                <div>
+                    <p class="text-slate-400 text-[10px] font-bold uppercase tracking-wider">Employers</p>
+                    <h2 class="text-2xl font-bold text-slate-800">{{ total_recruters }}</h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm">
+            <div class="flex items-center gap-4">
+                <div class="w-12 h-12 bg-amber-50 text-amber-600 rounded-2xl flex items-center justify-center">
+                    <i class="fa-solid fa-clock-rotate-left text-xl"></i>
+                </div>
+                <div>
+                    <p class="text-slate-400 text-[10px] font-bold uppercase tracking-wider">Pending</p>
+                    <h2 class="text-2xl font-bold text-amber-600">{{ pending_approvals }}</h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm border-b-4 border-b-blue-600">
+            <div class="flex items-center gap-4">
+                <div class="w-12 h-12 bg-slate-900 text-white rounded-2xl flex items-center justify-center">
+                    <i class="fa-solid fa-wallet text-xl"></i>
+                </div>
+                <div>
+                    <p class="text-slate-400 text-[10px] font-bold uppercase tracking-wider">Subscribed</p>
+                    <h2 class="text-2xl font-bold text-slate-800">{{ active_subscriptions }}</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        
+        <div class="lg:col-span-2 bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
+            <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-white sticky top-0">
+                <h3 class="font-bold text-slate-800">Employer Management</h3>
+                <span class="text-[10px] bg-slate-100 px-3 py-1 rounded-full font-bold text-slate-500 uppercase">View All</span>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left">
+                    <thead class="bg-slate-50 text-slate-400 text-[10px] font-bold uppercase">
+                        <tr>
+                            <th class="px-6 py-4">Company</th>
+                            <th class="px-6 py-4">Status</th>
+                            <th class="px-6 py-4 text-center">Verify</th>
+                            <th class="px-6 py-4 text-right">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody class="text-sm divide-y divide-slate-100">
+                        {% for r in recruters %}
+                        <tr class="hover:bg-slate-50/50 transition">
+                            <td class="px-6 py-4">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center overflow-hidden border border-slate-200">
+                                        {% if r.logo %}<img src="{{ r.logo.url }}" class="object-cover w-full h-full">{% else %}<i class="fa-solid fa-image text-slate-300"></i>{% endif %}
+                                    </div>
+                                    <div>
+                                        <p class="font-bold text-slate-700 leading-tight">{{ r.company_name }}</p>
+                                        <p class="text-[10px] text-slate-400">{{ r.industry }}</p>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4">
+                                <span class="px-2 py-1 rounded-md text-[10px] font-bold uppercase 
+                                    {% if r.approval_status == 'APPROVED' %}bg-emerald-50 text-emerald-600{% else %}bg-amber-50 text-amber-600{% endif %}">
+                                    {{ r.approval_status }}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 text-center">
+                                <a href="{% url 'Superuser:verify_docs' r.id %}" class="inline-flex items-center gap-1.5 text-blue-600 font-bold text-xs hover:bg-blue-50 px-3 py-1.5 rounded-xl transition">
+                                    <i class="fa-solid fa-file-shield"></i> Docs
+                                </a>
+                            </td>
+                            <td class="px-6 py-4 text-right">
+                                <button class="w-8 h-8 rounded-lg text-slate-300 hover:text-rose-500 hover:bg-rose-50 transition">
+                                    <i class="fa-solid fa-trash-can text-sm"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden h-fit">
+            <div class="p-6 border-b border-slate-100">
+                <h3 class="font-bold text-slate-800">New Seekers</h3>
+            </div>
+            <div class="p-2 divide-y divide-slate-50">
+                {% for s in seekers %}
+                <div class="flex items-center justify-between p-4 hover:bg-slate-50 rounded-2xl transition">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-full border-2 border-white shadow-sm overflow-hidden">
+                            {% if s.image %}<img src="{{ s.image.url }}" class="object-cover w-full h-full">{% endif %}
+                        </div>
+                        <div>
+                            <p class="font-bold text-slate-700 text-xs">{{ s.user.first_name }} {{ s.user.last_name }}</p>
+                            <p class="text-[10px] text-slate-400">{{ s.city }}, {{ s.state }}</p>
+                        </div>
+                    </div>
+                    <form method="POST" action="#">
+                        {% csrf_token %}
+                        <button type="submit" class="w-8 h-8 rounded-full flex items-center justify-center transition
+                            {% if s.user.is_active %}text-emerald-500 bg-emerald-50 hover:bg-rose-50 hover:text-rose-500{% else %}text-rose-500 bg-rose-50 hover:bg-emerald-50 hover:text-emerald-500{% endif %}">
+                            <i class="fa-solid {% if s.user.is_active %}fa-toggle-on{% else %}fa-toggle-off{% endif %} text-lg"></i>
+                        </button>
+                    </form>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

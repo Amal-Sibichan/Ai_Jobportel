@@ -3,7 +3,8 @@ from django.forms.formsets import formset_factory
 from .models import Recruter,documents
 from django.core.exceptions import ValidationError
 import re
-
+from django.utils import timezone
+import datetime
 
 class recruter_form(forms.Form):
     first_name = forms.CharField(max_length=100, required=False)
@@ -79,3 +80,40 @@ class DocumentUploadForm(forms.Form):
     def clean(self):
         cleaned_data = super().clean()
         return cleaned_data
+
+class job_form(forms.Form):
+    title = forms.CharField(max_length=50, required=True)
+    discription = forms.CharField(widget=forms.Textarea, required=True)
+    skills = forms.CharField(widget=forms.Textarea, required=True)
+    education = forms.CharField(max_length=50, required=False)
+    EXP_CHOICES = [("0-1","0-1 Years"),("1-3","1-3 Years"),("3-5","3-5 Years"),("5+","5+ Years")]
+    experience = forms.ChoiceField(choices=EXP_CHOICES, required=True)
+    salary = forms.CharField(required=True)
+    responsablity = forms.CharField(widget=forms.Textarea, required=False)
+    due = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}), required=True)
+
+    def clean_salary(self):
+        salary=self.cleaned_data.get('salary','')
+        if salary:
+            if not salary.isdigit():
+                raise forms.ValidationError('Enter a valid salary')
+        return salary
+
+    def clean_due(self):
+        due=self.cleaned_data.get('due','')
+        if due:
+            if due < datetime.date.today():
+                raise forms.ValidationError('Due date must be in the future')
+        return due
+    
+    def clean_skills(self):
+        skills=self.cleaned_data.get('skills','')
+        if skills:
+            if len(skills) < 10:
+                raise forms.ValidationError('Skills must be atleast 10 characters long')
+        return skills
+
+    def clean(self):
+        cleaned_data = super().clean()
+        return cleaned_data
+

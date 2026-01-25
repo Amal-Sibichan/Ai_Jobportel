@@ -7,5 +7,7 @@ urlpatterns = [
     path('recruter/profile',views.recruter_profile,name='recruter_profile'),
     path('recruter/profile/update',views.recruter_update,name='profile_update'),
     path('recruter/upload_docs',views.upload_docs,name='upload_docs'),
+    path('recruter/post_job',views.post_job,name='post_job'),
+    path('recruter/job_list',views.job_list,name='job_list'),
 
 ]
