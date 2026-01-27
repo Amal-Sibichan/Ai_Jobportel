@@ -1,0 +1,109 @@
+{% extends 'main/index.html' %}
+{% load widget_tweaks %}
+
+{% block content %}
+<div class="min-h-screen bg-slate-50 py-12 px-4">
+    <div class="max-w-5xl mx-auto">
+        
+        <div class="mb-10 flex flex-col md:flex-row justify-between items-end gap-6">
+            <div>
+                <h1 class="text-3xl font-bold text-slate-800 tracking-tight">Candidate Pipeline</h1>
+                <p class="text-slate-500 mt-1 italic">Analyzing fitness for: <span class="text-blue-600 font-bold">{{ job.title }}</span></p>
+            </div>
+            <div class="bg-white px-4 py-2 rounded-2xl border border-slate-200 shadow-sm">
+                <p class="text-[10px] font-black uppercase text-slate-400">Total Applicants</p>
+                <p class="text-xl font-bold text-slate-800 text-center">{{ counts.total }}</p>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+            <div onclick="showCategory('excellent', this)" id="card-excellent" 
+                 class="pipeline-card active bg-white p-8 rounded-3xl border-2 border-transparent shadow-sm cursor-pointer transition-all hover:translate-y-[-4px] group">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-4xl font-black text-emerald-500 group-[.active]:scale-110 transition">{{ counts.excellent }}</span>
+                    <i class="fa-solid fa-star text-emerald-200"></i>
+                </div>
+                <span class="block text-[11px] font-black uppercase tracking-widest text-emerald-600">Excellent Match</span>
+            </div>
+
+            <div onclick="showCategory('good', this)" id="card-good"
+                 class="pipeline-card bg-white p-8 rounded-3xl border-2 border-transparent shadow-sm cursor-pointer transition-all hover:translate-y-[-4px] group">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-4xl font-black text-amber-500">{{ counts.good }}</span>
+                    <i class="fa-solid fa-thumbs-up text-amber-200"></i>
+                </div>
+                <span class="block text-[11px] font-black uppercase tracking-widest text-amber-600">Good Match</span>
+            </div>
+
+            <div onclick="showCategory('low', this)" id="card-low"
+                 class="pipeline-card bg-white p-8 rounded-3xl border-2 border-transparent shadow-sm cursor-pointer transition-all hover:translate-y-[-4px] group">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-4xl font-black text-rose-500">{{ counts.low }}</span>
+                    <i class="fa-solid fa-triangle-exclamation text-rose-200"></i>
+                </div>
+                <span class="block text-[11px] font-black uppercase tracking-widest text-rose-600">Low Match</span>
+            </div>
+        </div>
+
+        <div class="space-y-6">
+            
+            <div id="excellent" class="candidate-section space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="h-1 w-10 bg-emerald-500 rounded-full"></div>
+                    <h3 class="text-xs font-black text-slate-800 uppercase tracking-widest">Elite Talent (> 70%)</h3>
+                </div>
+                {% for x in data %}
+                    {% if x.category == 'excellent' %}
+                        {% include 'recruter_temp/includes/candidate_row.html' with x=x color="emerald" %}
+                    {% endif %}
+                {% endfor %}
+            </div>
+
+            <div id="good" class="candidate-section hidden space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="h-1 w-10 bg-amber-500 rounded-full"></div>
+                    <h3 class="text-xs font-black text-slate-800 uppercase tracking-widest">Potential Hires (61-70%)</h3>
+                </div>
+                {% for x in data %}
+                    {% if x.category == 'good' %}
+                        {% include 'recruter_temp/includes/candidate_row.html' with x=x color="amber" %}
+                    {% endif %}
+                {% endfor %}
+            </div>
+
+            <div id="low" class="candidate-section hidden space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="h-1 w-10 bg-rose-500 rounded-full"></div>
+                    <h3 class="text-xs font-black text-slate-800 uppercase tracking-widest">Needs Review (≤ 60%)</h3>
+                </div>
+                {% for x in data %}
+                    {% if x.category == 'low' %}
+                        {% include 'recruter_temp/includes/candidate_row.html' with x=x color="rose" %}
+                    {% endif %}
+                {% endfor %}
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<style>
+    .pipeline-card.active {
+        border-color: #3b82f6 !important;
+        background-color: #eff6ff !important;
+        box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.1) !important;
+    }
+</style>
+
+<script>
+    function showCategory(categoryId, element) {
+        document.querySelectorAll('.pipeline-card').forEach(card => card.classList.remove('active'));
+        element.classList.add('active');
+
+        document.querySelectorAll('.candidate-section').forEach(section => {
+            section.classList.add('hidden');
+        });
+        document.getElementById(categoryId).classList.remove('hidden');
+    }
+</script>
+{% endblock %}

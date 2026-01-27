@@ -1,0 +1,27 @@
+<div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm flex items-center justify-between hover:border-blue-400 transition group">
+    <div class="flex items-center gap-5">
+        <div class="w-14 h-14 bg-slate-50 rounded-2xl flex items-center justify-center font-bold text-slate-400 group-hover:bg-blue-50 group-hover:text-blue-600 transition border border-slate-100">
+            {{ x.user.name|slice:":1" }}
+        </div>
+        <div>
+            <h4 class="font-bold text-slate-800 text-lg group-hover:text-blue-600 transition">{{ x.user.name }}</h4>
+            <div class="flex items-center gap-3 mt-1 text-[10px] text-slate-400 font-bold uppercase tracking-tight">
+                <span>ID: #{{ x.id }}</span>
+                <span class="w-1 h-1 bg-slate-300 rounded-full"></span>
+                <span>Status: {{ x.status }}</span>
+            </div>
+        </div>
+    </div>
+    
+    <div class="flex items-center gap-6">
+        <div class="px-5 py-2 rounded-xl font-black text-xs border 
+            {% if color == 'emerald' %}bg-emerald-50 text-emerald-700 border-emerald-100
+            {% elif color == 'amber' %}bg-amber-50 text-amber-700 border-amber-100
+            {% else %}bg-rose-50 text-rose-700 border-rose-100{% endif %}">
+            {{ x.final_score }}% FIT
+        </div>
+        <a href="#" class="bg-slate-900 text-white px-6 py-2.5 rounded-xl text-[10px] font-black uppercase hover:bg-blue-600 transition shadow-lg shadow-slate-200">
+            View Full Resume
+        </a>
+    </div>
+</div>

@@ -3,7 +3,7 @@ from django.contrib.auth.models import User
 
 from httpx._transports import default
 from pgvector.django import VectorField
-
+from recruiter.models import job
 # Create your models here.
 class seeker(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
@@ -68,4 +68,36 @@ class skill(models.Model):
     def __str__(self):
         return self.name
 
+class application(models.Model):
+    seeker=models.ForeignKey(seeker,on_delete=models.CASCADE,related_name="applications")
+    job=models.ForeignKey(job,on_delete=models.CASCADE,related_name="applications")
+    status=models.CharField(max_length=20,choices=[("PENDING","Pending"),("SHORTLISTED","Shortlisted"),("REJECTED","Rejected")],default="PENDING")
+    matched_skills=models.JSONField(null=True,blank=True)
+    unmatched_skills=models.JSONField(null=True,blank=True)
+    final_score=models.FloatField(default=0.0)
+    skill_score=models.FloatField(default=0.0)
+    semantic_score=models.FloatField(default=0.0)
+    entity_score=models.FloatField(default=0.0)
+    ats_score=models.FloatField(default=0.0)
+    CATEGORY_CHOICES = [('excellent', 'Excellent Match'),('good', 'Good Match'),('low', 'Low Match'),]
+    category = models.CharField(max_length=20,choices=CATEGORY_CHOICES,db_index=True,null=True)    
+    created_at=models.DateTimeField(auto_now_add=True)
+    updated_at=models.DateTimeField(auto_now=True)
+    class meta:
+        constriants = [
+            models.UniqueConstraint(
+                fields=['seeker','job'],
+                name='unique_seeker_job_application'
+            )
+        ]
+    def save(self, *args, **kwargs):
+        if self.final_score > 70:
+            self.category = 'excellent'
+        elif self.final_score > 60:
+            self.category = 'good'
+        else:
+            self.category = 'low'
+        super().save(*args, **kwargs)
 
+    def __str__(self):
+        return f"{self.seeker.user.username} - {self.job.title}"

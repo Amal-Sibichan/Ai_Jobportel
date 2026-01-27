@@ -32,8 +32,16 @@ def update(request,r_id):
     recruter_instance=Recruter.objects.get(id=r_id)
     docs, created = documents.objects.get_or_create(recruter=recruter_instance)
     if request.method == 'POST':
-        test = 'gst_verified' in request.POST
         docs.registration_verified = 'registration_verified' in request.POST
         docs.pan_verified = 'pan_verified' in request.POST
         docs.address_proof_verified = 'address_proof_verified' in request.POST
-    return HttpResponse(test)
+        docs.gst_verified = 'gst_verified' in request.POST
+        docs.save()
+
+        if docs.is_documents_complete() and docs.all_documents_verified():
+            recruter_instance.approval_status = "APPROVED"
+            recruter_instance.save()
+        else:
+            recruter_instance.approval_status = "PENDING"
+            recruter_instance.save()
+    return HttpResponse("saved sucessfully")

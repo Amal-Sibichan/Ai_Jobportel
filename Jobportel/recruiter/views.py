@@ -1,5 +1,6 @@
-from django.shortcuts import redirect, render
+from django.shortcuts import redirect,render,get_object_or_404
 from recruiter.models import Recruter,documents,job
+from Seeker.models import seeker,resume,application
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required,user_passes_test
 from django.views.decorators.http import require_POST, require_http_methods
@@ -87,8 +88,15 @@ def upload_docs(request):
             reg=form.cleaned_data['registration']
             pan=form.cleaned_data['pan_card']
             address=form.cleaned_data['address_proof']
-            new_docs=documents.objects.create(recruter=recruter,gst_certificate=gst,registration=reg,pan_card=pan,address_proof=address)
-            new_docs.save()
+            docs.gst_certificate = gst
+            docs.registration = reg
+            docs.pan_card = pan
+            docs.address_proof = address
+            docs.gst_verified = False
+            docs.registration_verified = False
+            docs.pan_verified = False
+            docs.address_proof_verified = False
+            docs.save()
             return HttpResponse("Documents Uploaded")
     else:
         form=DocumentUploadForm()
@@ -149,10 +157,25 @@ def post_job(request):
 
     return render(request, 'recruter_temp/Post_job.html', {'form': form})
 
-
+@login_required
+@user_passes_test(is_recruter, login_url='/access-denied/')
 def job_list(request):
     current_recruter=Recruter.objects.get(user=request.user)
     jobs = job.objects.filter(recruter=current_recruter)
     count=jobs.count()
     today=datetime.date.today()
     return render(request, 'recruter_temp/job_list.html', {'jobs': jobs,'count':count,'today':today})
+
+@login_required
+@user_passes_test(is_recruter, login_url='/access-denied/')
+def candidate_pool(request,job_id):
+    target_job = get_object_or_404(job, id=job_id)
+    app_data=application.objects.filter(job_id=job_id).select_related('seeker__user','job')
+    count={
+        'excellent': app_data.filter(category='excellent').count(),
+        'good': app_data.filter(category='good').count(),
+        'low': app_data.filter(category='low').count(),
+        'total': app_data.count()
+    }
+    
+    return render(request,'recruter_temp/candidate_list.html',{'data':app_data,'count':count,'job':target_job})

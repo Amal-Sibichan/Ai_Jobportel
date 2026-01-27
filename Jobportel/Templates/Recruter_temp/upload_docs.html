@@ -135,7 +135,7 @@
 
             <div class="flex justify-center pt-6">
                 <button type="submit" class="bg-slate-900 text-white px-12 py-4 rounded-2xl font-bold hover:bg-slate-800 transition shadow-xl flex items-center gap-3">
-                    <i class="fa-solid fa-cloud-arrow-up"></i> Upload Documents for Review
+                    <i class="fa-solid fa-cloud-arrow-up"></i> {% if docs.is_documents_complete %}Update Documents{% else %} Upload Documents for Review{% endif %}
                 </button>
             </div>
         </form>

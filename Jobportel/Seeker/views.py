@@ -6,7 +6,7 @@ from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST, require_http_methods
 from numpy import info
-from .models import Experience, seeker,skill,Education,resume
+from .models import Experience, seeker,skill,Education,resume,application
 from .forms import profileupdateform,upload_resume
 from .utils import extract,entity_score_spacy,atscore,pool_score,semantic_similarity,jaccard_skill_score,generate_vector
 from .LLM import extract_skills_llm
@@ -139,3 +139,20 @@ def Resume_upload(request):
             new_res = resume.objects.create(resume=res,seeker=user_res,resume_vector=vector_Emp,resume_text=res_text,ats_score=ats_score,entity_score=entity_score,skills=skill_list)
             new_res.save()
             return HttpResponse("Resume Uploaded")
+
+@login_required
+def job_application(request,job_id):
+    user_res=seeker.objects.get(user=request.user)
+    user_resume=resume.objects.get(seeker=user_res)
+    jobs=job.objects.get(id=job_id)
+    Skill_dict=jaccard_skill_score(user_resume.skills,jobs.skills)
+    semantic_score=semantic_similarity(user_resume.resume_vector,jobs.job_vector)
+    ats=user_resume.ats_score
+    entity=user_resume.entity_score
+    skill_score=Skill_dict['score']
+    matched = Skill_dict['matched']
+    unmatched = Skill_dict['unmatched']
+    final_score= round((0.4 * skill_score + 0.15 * ats + 0.10 * entity + 0.35 * semantic_score)*100,2)
+    new_app = application.objects.create(seeker=user_res,job=jobs,matched_skills=matched,unmatched_skills=unmatched,final_score=final_score,skill_score=skill_score,semantic_score=semantic_score,entity_score=entity,ats_score=ats)
+    new_app.save()
+    return HttpResponse(final_score)

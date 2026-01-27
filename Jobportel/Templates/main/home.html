@@ -10,40 +10,59 @@
         <p class="text-slate-500 text-sm">Based on your saved skills and interests</p>
     </div>
     {% for job in jobs %}
-    <article class="bg-white border border-slate-200 rounded-3xl shadow-sm overflow-hidden transition hover:border-blue-300">
-        <div class="p-5 flex items-center justify-between">
-            <div class="flex items-center gap-3">
-                <div class="w-12 h-12 rounded-2xl bg-slate-50 flex items-center justify-center p-2">
-                    <img src="https://logo.clearbit.com/apple.com" alt="Apple">
-                </div>
-                <div>
-                    <h4 class="font-bold text-slate-800">{{ job.recruter.company_name }}</h4>
-                    <p class="text-xs text-slate-400 uppercase">{{job.recruter.address}}</p>
-                </div>
-            </div>
-            <button class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-ellipsis-vertical"></i></button>
-        </div>
+    <article class="bg-white border border-slate-200 rounded-3xl shadow-sm overflow-hidden">
+                    <div class="p-5 flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <div class="w-12 h-12 rounded-2xl bg-slate-100 p-2 flex items-center justify-center">
+                                <img src="https://logo.clearbit.com/microsoft.com" alt="Microsoft" class="w-full h-full object-contain">
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-slate-800">{{ job.recruter.company_name }} <i class="fa-solid fa-circle-check text-blue-500 text-[10px] ml-1"></i></h4>
+                                <p class="text-xs text-slate-400 font-medium uppercase tracking-wider">{{ job.recruter.address }} • 4h ago</p>
+                            </div>
+                        </div>
+                        <button class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-ellipsis-vertical"></i></button>
+                    </div>
 
-        <div class="px-5 pb-6">
-            <h3 class="text-lg font-bold text-slate-800 mb-2">{{job.title}}</h3>
-            <p class="text-slate-600 text-sm leading-relaxed mb-4">
-                {{job.discription}}
-            </p>
+                    <div class="px-5 pb-2">
+                        <h3 class="text-lg font-bold text-slate-800 mb-2">{{ job.title }}</h3>
+                        <p class="text-slate-600 text-sm leading-relaxed">
+                            {{ job.discription }}
+                        </p>
+                    </div>
+
+                    <div class="px-5 py-3">
+                        <div class="rounded-2xl overflow-hidden aspect-[16/9] bg-slate-200">
+                            <img src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=800&q=80" 
+                                 class="w-full h-full object-cover" alt="Office Culture">
+                        </div>
+                    </div>
+                    <div class="flex gap-2 mb-4">
+                        {% for skill in job.skills %}
+                        <span class="px-3 py-1 bg-slate-100 text-slate-600 text-xs rounded-lg font-semibold">{{skill}}</span>
+                        {% endfor %}
+                    </div>
             
-            <div class="flex gap-2 mb-4">
-                {% for skill in job.skills %}
-                <span class="px-3 py-1 bg-slate-100 text-slate-600 text-xs rounded-lg font-semibold">{{skill}}</span>
-                {% endfor %}
-            </div>
-            
-            <button class="w-full bg-slate-900 text-white py-3 rounded-xl font-bold hover:bg-slate-800 transition">
-                Quick Apply
-            </button>
-        </div>
-    </article>
+
+                    <div class="px-5 py-4 flex items-center justify-between border-t border-slate-50">
+                        <div class="flex items-center gap-6">
+                            <button class="flex items-center gap-2 text-slate-500 hover:text-rose-500 transition">
+                                <i class="fa-regular fa-heart text-xl"></i> <span class="text-xs font-bold">1.2k</span>
+                            </button>
+                            <button class="flex items-center gap-2 text-slate-500 hover:text-blue-600 transition">
+                                <i class="fa-regular fa-comment text-xl"></i> <span class="text-xs font-bold">45</span>
+                            </button>
+                            <button class="flex items-center gap-2 text-slate-500 hover:text-emerald-500 transition">
+                                <i class="fa-regular fa-share-from-square text-xl"></i>
+                            </button>
+                        </div>
+                        <a href="{% url 'seeker:application' job.id %}"class="bg-slate-900 text-white px-6 py-2 rounded-xl text-sm font-bold hover:bg-slate-800 transition">
+                            Apply Now
+                        </a>
+                    </div>
+                </article>
     {% endfor %}
 
-    
 
 </div>
 {% endblock content %}

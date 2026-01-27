@@ -77,14 +77,8 @@ def entity_score_spacy(resume_text):
 
 # SEMANTIC SIMILARITY............................................................................
 
-def semantic_similarity(resume_text, jd_text):
-    resume_clean = clean_text(resume_text)
-    jd_clean = clean_text(jd_text)
-
-    emb_jd = model.encode(jd_clean, convert_to_tensor=True)
-    emb_res = model.encode(resume_clean, convert_to_tensor=True)
-    similarity = util.cos_sim(emb_jd, emb_res).item()
-
+def semantic_similarity(resume_vector, jd_vector):
+    similarity = util.cos_sim(jd_vector, resume_vector).item()
     return round(similarity, 2)
 
 

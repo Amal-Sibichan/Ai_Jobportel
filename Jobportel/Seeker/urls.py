@@ -9,6 +9,8 @@ urlpatterns = [
     path('profileupdate',views.profileupdate,name='profileupdate'),
     path('Resume_upload',views.Resume_upload,name='Resume_upload'),
     path('seeker/dashboard', views.seeker_home, name='seeker_page'),
+    path('seeker/application/<int:job_id>/', views.job_application, name='application'),
+    
 
 
     
