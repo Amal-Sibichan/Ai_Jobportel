@@ -63,3 +63,43 @@ Resume text:
 
     json_text = atslist[start:end]
     return json_text 
+
+
+def resume_bot(ctx, question):
+    system_instruction = (
+        "You are an expert HR Strategy AI. You have access to a Candidate's Resume, "
+        "the Job Requirements, and AI-calculated match scores. "
+        "Your goal is to help the HR understand if this candidate is a good hire. "
+        "Use Markdown for formatting: Use **bold** for emphasis and bullet points for lists. "
+        "Be concise but highly insightful."
+    )
+
+    # We feed the AI every piece of data we have
+    user_prompt = f"""
+    --- DATABASE CONTEXT ---
+    RECRUITING FOR: {ctx['job_title']}
+    AI MATCH SCORE: {ctx['final_score']}%
+    SKILLS MATCHED: {ctx['matched']}
+    SKILLS MISSING: {ctx['unmatched']}
+    ATS FORMAT RATING: {ctx['ats_format_score']}%
+
+    RESUME CONTENT:
+    \"\"\"
+    {ctx['resume_text']}
+    \"\"\"
+
+    --- HR QUESTION ---
+    {question}
+    """
+
+    response = client.chat.completions.create(
+        messages=[
+            {"role": "system", "content": system_instruction},
+            {"role": "user", "content": user_prompt}
+        ],
+        model="llama-3.3-70b-versatile",
+        temperature=0.3, 
+        max_tokens=700
+    )
+
+    return response.choices[0].message.content

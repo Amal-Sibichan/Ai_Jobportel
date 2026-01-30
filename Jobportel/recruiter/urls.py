@@ -9,6 +9,9 @@ urlpatterns = [
     path('recruter/upload_docs',views.upload_docs,name='upload_docs'),
     path('recruter/post_job',views.post_job,name='post_job'),
     path('recruter/job_list',views.job_list,name='job_list'),
-    path('recruter/candidate_pool/<int:job_id>',views.candidate_pool,name='candidate_pool')
+    path('recruter/candidate_pool/<int:job_id>',views.candidate_pool,name='candidate_pool'),
+    path('recruter/candidate_details/<int:candidate_id>/<int:job_id>',views.candidate_details,name='candidate_details'),
+    path('chatbot/ask/', views.ask_bot, name='chatbot_ask'),
+
 
 ]

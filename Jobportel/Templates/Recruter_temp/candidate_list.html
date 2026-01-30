@@ -12,7 +12,7 @@
             </div>
             <div class="bg-white px-4 py-2 rounded-2xl border border-slate-200 shadow-sm">
                 <p class="text-[10px] font-black uppercase text-slate-400">Total Applicants</p>
-                <p class="text-xl font-bold text-slate-800 text-center">{{ counts.total }}</p>
+                <p class="text-xl font-bold text-slate-800 text-center">{{ count.total }}</p>
             </div>
         </div>
 
@@ -20,7 +20,7 @@
             <div onclick="showCategory('excellent', this)" id="card-excellent" 
                  class="pipeline-card active bg-white p-8 rounded-3xl border-2 border-transparent shadow-sm cursor-pointer transition-all hover:translate-y-[-4px] group">
                 <div class="flex items-center justify-between mb-2">
-                    <span class="text-4xl font-black text-emerald-500 group-[.active]:scale-110 transition">{{ counts.excellent }}</span>
+                    <span class="text-4xl font-black text-emerald-500 group-[.active]:scale-110 transition">{{ count.excellent }}</span>
                     <i class="fa-solid fa-star text-emerald-200"></i>
                 </div>
                 <span class="block text-[11px] font-black uppercase tracking-widest text-emerald-600">Excellent Match</span>
@@ -29,7 +29,7 @@
             <div onclick="showCategory('good', this)" id="card-good"
                  class="pipeline-card bg-white p-8 rounded-3xl border-2 border-transparent shadow-sm cursor-pointer transition-all hover:translate-y-[-4px] group">
                 <div class="flex items-center justify-between mb-2">
-                    <span class="text-4xl font-black text-amber-500">{{ counts.good }}</span>
+                    <span class="text-4xl font-black text-amber-500">{{ count.good }}</span>
                     <i class="fa-solid fa-thumbs-up text-amber-200"></i>
                 </div>
                 <span class="block text-[11px] font-black uppercase tracking-widest text-amber-600">Good Match</span>
@@ -38,7 +38,7 @@
             <div onclick="showCategory('low', this)" id="card-low"
                  class="pipeline-card bg-white p-8 rounded-3xl border-2 border-transparent shadow-sm cursor-pointer transition-all hover:translate-y-[-4px] group">
                 <div class="flex items-center justify-between mb-2">
-                    <span class="text-4xl font-black text-rose-500">{{ counts.low }}</span>
+                    <span class="text-4xl font-black text-rose-500">{{ count.low }}</span>
                     <i class="fa-solid fa-triangle-exclamation text-rose-200"></i>
                 </div>
                 <span class="block text-[11px] font-black uppercase tracking-widest text-rose-600">Low Match</span>

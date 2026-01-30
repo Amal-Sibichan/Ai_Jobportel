@@ -64,10 +64,10 @@ class recruter_form(forms.Form):
 
     def clean(self):
         cleaned_data = super().clean()
-        bio=cleaned_data.get("bio","")
+        bio=cleaned_data.get("decription","")
         headline=cleaned_data.get("headlin","")
         if bio and len(bio)<10:
-            self.add_error("bio","Bio must be atleast 10 characters Long")
+            self.add_error("decription","Description must be atleast 10 characters Long")
         return cleaned_data
 
 

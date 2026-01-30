@@ -1,14 +1,16 @@
 from django.shortcuts import redirect,render,get_object_or_404
 from recruiter.models import Recruter,documents,job
-from Seeker.models import seeker,resume,application
+from Seeker.models import Education, seeker,resume,application,Experience
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required,user_passes_test
 from django.views.decorators.http import require_POST, require_http_methods
 from Seeker.utils import extract,entity_score_spacy,atscore,pool_score,semantic_similarity,jaccard_skill_score,generate_vector
+from Seeker.LLM import resume_bot
 from .forms import recruter_form,DocumentUploadForm,job_form
-from django.http import HttpResponse
+from django.http import HttpResponse,JsonResponse
 from django.contrib import messages
 import datetime
+import json
 
 def is_recruter(user):
     return hasattr(user, 'recruter')
@@ -179,3 +181,52 @@ def candidate_pool(request,job_id):
     }
     
     return render(request,'recruter_temp/candidate_list.html',{'data':app_data,'count':count,'job':target_job})
+    
+@login_required
+@user_passes_test(is_recruter, login_url='/access-denied/')
+def candidate_details(request,candidate_id,job_id):
+    candidate = get_object_or_404(seeker, id=candidate_id)
+    jobs = get_object_or_404(job, id=job_id)
+    app = get_object_or_404(application, seeker=candidate, job=jobs)
+    experience=Experience.objects.filter(seeker=candidate).order_by("-id").first()
+    education = Education.objects.filter(seeker=candidate).order_by("id").first()
+    matched = app.matched_skills.split(", ") if app.matched_skills else []
+    unmatched = app.unmatched_skills.split(", ") if app.unmatched_skills else []
+    return render(request,'recruter_temp/candidate_details.html',{'candidate':candidate,'job':jobs,'app':app,'matched':matched,'unmatched':unmatched,'edu':education,'exp':experience})
+
+def ask_bot(request):
+    if request.method == "POST":
+        try:
+            # 1. Parse JSON from the frontend
+            data = json.loads(request.body)
+            user_question = data.get('message')
+            app_id = data.get('user_id') # The ID you are passing from JS
+
+            # 2. Fetch the "Triple Context" using select_related for speed
+            # This pulls Application + Job + Seeker + User in ONE query
+            app = application.objects.select_related('job', 'seeker', 'seeker__user').get(id=app_id)
+            
+            # 3. Build the Data Bundle for the LLM
+            context_bundle = {
+                "resume_text": app.seeker.resume.resume_text,
+                "job_title": app.job.title,
+                "job_requirements": app.job.discription, # Or app.job.skills
+                "final_score": app.final_score,
+                "matched": app.matched_skills,
+                "unmatched": app.unmatched_skills,
+                "ats_format_score": app.ats_score
+            }
+
+            # 4. Get the AI Answer
+            ai_reply = resume_bot(context_bundle, user_question)
+            
+            return JsonResponse({'reply': ai_reply})
+
+        except application.DoesNotExist:
+            return JsonResponse({'reply': "Error: Could not find that application record."}, status=404)
+        except Exception as e:
+            # Check your terminal for this print if you get a 500 error!
+            print(f"Chatbot Logic Error: {e}")
+            return JsonResponse({'reply': f"I'm sorry, I encountered an error: {str(e)}"}, status=500)
+
+    return JsonResponse({'reply': "Invalid Request"}, status=400)

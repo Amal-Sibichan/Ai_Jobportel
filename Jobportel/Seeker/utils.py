@@ -46,7 +46,7 @@ def jaccard_skill_score(data, required_skills):
     else:
         # Note: This is technically an "Overlap Coefficient" logic 
         # based on your original denominator of len(required_set)
-        score = len(matched_skills) / len(required_set)
+        score = len(matched_skills) / len(required_set)*100
 
     return {
         "score": round(score, 2),
@@ -71,15 +71,16 @@ def entity_score_spacy(resume_text):
     # print("Important entity types found:", matched)
 
     # Normalize score (max = number of important entity types)
-    score = len(matched) / len(important)
-
+    score = len(matched) / len(important)*100
+    
     return round(score, 2)
 
 # SEMANTIC SIMILARITY............................................................................
 
 def semantic_similarity(resume_vector, jd_vector):
     similarity = util.cos_sim(jd_vector, resume_vector).item()
-    return round(similarity, 2)
+    sim_score=similarity*100
+    return round(sim_score, 2)
 
 
 # POOLING............................................................................
@@ -134,7 +135,9 @@ def  atscore(data):
     elif length == 'long':
         score += 0.1
 
-    return round(score, 2)
+
+    ats_score=score*100
+    return round(ats_score, 2)
 
 
 

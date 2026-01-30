@@ -2,6 +2,9 @@ from django import forms
 from .models import seeker
 from django.core.exceptions import ValidationError
 import re
+import datetime
+from django.utils import timezone
+
 
 class profileupdateform(forms.Form):
     first_name = forms.CharField(max_length=100, required=False)
@@ -89,4 +92,42 @@ class upload_resume(forms.Form):
 
     def clean(self):
         return super().clean()
-        
+
+class education_form(forms.Form):
+    LEVEL_CHOICES = [("Degree","Degree"),("Diploma","Diploma"),("PG","PG"),("SSLC","SSLC"),("HSC","HSC")]
+    level = forms.ChoiceField(choices=LEVEL_CHOICES, required=False)
+    institution = forms.CharField(max_length=100)
+    course = forms.CharField(max_length=50)
+    start = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
+    end = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}), required=False)
+    description = forms.CharField(widget=forms.Textarea, required=False)
+
+    def clean_institution(self):
+        inst=self.cleaned_data.get('institution')
+        if inst:
+            if len(inst) < 3:
+                self.add_error("institution", "Enter a valid institution")
+        return inst
+
+    def clean_course(self):
+        course=self.cleaned_data.get('course')
+        if course and len(course) < 2:
+            self.add_error("course", "Enter a valid course")
+        return course
+    def clean_description(self):
+        des=self.cleaned_data.get('description')
+        if des and len(des) < 10:
+            self.add_error("description","Description must be atleast 10 characters Long")
+        return des
+
+    def clean(self):
+        cleaned_data = super().clean()
+        start = cleaned_data.get("start")
+        end = cleaned_data.get("end")
+
+        if start and start > datetime.date.today():
+            self.add_error("start", "Enter a valid date")
+
+        if start and end and end < start:
+            self.add_error("end", "Enter a valid date")
+        return cleaned_data

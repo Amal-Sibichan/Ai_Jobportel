@@ -4,10 +4,11 @@ import json
 from django.http import JsonResponse
 from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
+from django.contrib import messages
 from django.views.decorators.http import require_POST, require_http_methods
 from numpy import info
 from .models import Experience, seeker,skill,Education,resume,application
-from .forms import profileupdateform,upload_resume
+from .forms import profileupdateform,upload_resume,education_form
 from .utils import extract,entity_score_spacy,atscore,pool_score,semantic_similarity,jaccard_skill_score,generate_vector
 from .LLM import extract_skills_llm
 from recruiter.models import job
@@ -26,8 +27,9 @@ def profile(request):
     Experiences=seeker.experiences.all()
     Education=seeker.education.all()
     skills=seeker.skills.all()
+    edu_form = education_form()
     
-    return render(request,'seeker/profile.html',{'user':user,'skills':skills})
+    return render(request,'seeker/profile.html',{'user':user,'skills':skills,'form':edu_form,'education':Education,'experiences':Experiences})
 
 @login_required
 @require_POST
@@ -121,7 +123,12 @@ def Resume_upload(request):
         form=upload_resume(request.POST,request.FILES)
         if form.is_valid():
             res=form.cleaned_data['resume']
-            if user_res.resume.resume:
+           # Use hasattr to check if the one-to-one relation 'resume' exists
+            if hasattr(user_res, 'resume'):
+                # Optional: Delete the physical file from storage if it exists
+                if user_res.resume.resume:
+                    user_res.resume.resume.delete(save=False)
+                # Delete the database record
                 user_res.resume.delete()
             
             res_text=extract(res)
@@ -138,11 +145,15 @@ def Resume_upload(request):
             
             new_res = resume.objects.create(resume=res,seeker=user_res,resume_vector=vector_Emp,resume_text=res_text,ats_score=ats_score,entity_score=entity_score,skills=skill_list)
             new_res.save()
-            return HttpResponse("Resume Uploaded")
+            messages.success(request, 'Resume uploaded  successfully!')
+        return redirect('seeker:profile')
 
 @login_required
 def job_application(request,job_id):
     user_res=seeker.objects.get(user=request.user)
+    if not hasattr(user_res, 'resume'):
+        messages.error(request, 'Please upload a resume first.')
+        return redirect('seeker:seeker_page')
     user_resume=resume.objects.get(seeker=user_res)
     jobs=job.objects.get(id=job_id)
     Skill_dict=jaccard_skill_score(user_resume.skills,jobs.skills)
@@ -152,7 +163,46 @@ def job_application(request,job_id):
     skill_score=Skill_dict['score']
     matched = Skill_dict['matched']
     unmatched = Skill_dict['unmatched']
-    final_score= round((0.4 * skill_score + 0.15 * ats + 0.10 * entity + 0.35 * semantic_score)*100,2)
+    final_score= round((0.4 * skill_score + 0.15 * ats + 0.10 * entity + 0.35 * semantic_score),2)
     new_app = application.objects.create(seeker=user_res,job=jobs,matched_skills=matched,unmatched_skills=unmatched,final_score=final_score,skill_score=skill_score,semantic_score=semantic_score,entity_score=entity,ats_score=ats)
     new_app.save()
-    return HttpResponse(final_score)
+    messages.success(request, 'Application submitted successfully !')
+    return redirect('seeker:seeker_page')
+
+
+
+def add_education(request):
+    user_instance=seeker.objects.get(user=request.user)
+    if request.method == "POST":
+        form=education_form(request.POST)
+        if form.is_valid():
+            Education.objects.create(
+                seeker=user_instance,
+                institution=form.cleaned_data["institution"],
+                level=form.cleaned_data["level"],
+                course=form.cleaned_data["course"],
+                start=form.cleaned_data["start"],
+                end=form.cleaned_data["end"],
+                description=form.cleaned_data["description"],
+            )
+            return JsonResponse(
+                {
+                    "success": True,
+                    "message": "Education added successfully"
+                },
+                status=201
+            )
+        else:
+            return JsonResponse(
+                {
+                    "success": False,
+                    "errors": form.errors
+                },
+                status=400
+            )
+    else:
+        form=education_form()
+        return render(request,'seeker/profile.html',{'form':form})
+
+def add_experience(request):
+    pass

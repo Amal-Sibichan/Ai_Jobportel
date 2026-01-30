@@ -10,6 +10,8 @@ urlpatterns = [
     path('Resume_upload',views.Resume_upload,name='Resume_upload'),
     path('seeker/dashboard', views.seeker_home, name='seeker_page'),
     path('seeker/application/<int:job_id>/', views.job_application, name='application'),
+    path('seeker/add_education',views.add_education,name='education'),
+    path('seeker/add_experience',views.add_experience,name='experience')
     
 
 
