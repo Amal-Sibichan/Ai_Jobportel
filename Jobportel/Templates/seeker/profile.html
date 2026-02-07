@@ -71,6 +71,45 @@
         </form>
     </div>
 </div>
+<div id="experience-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center hidden">
+    <div class="bg-white w-full max-w-lg rounded-3xl shadow-2xl p-8 transform transition-all">
+        <div class="flex justify-between items-center mb-6">
+            <h3 class="text-xl font-bold text-slate-800">Add Experience</h3>
+            <button onclick="toggleModal('experience-modal')" class="text-slate-400 hover:text-slate-600">
+                <i class="fa-solid fa-xmark text-xl"></i>
+            </button>
+        </div>
+        <form id="experience-form" method='post' class="grid grid-cols-2 gap-4">
+            {% csrf_token %}
+            <div class="col-span-2">
+                <label class="block text-xs font-bold uppercase text-slate-400 mb-2">Company</label>
+                {% render_field e_form.company class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition" %}
+                <p id="error-company" class="text-red-600 text-sm mt-1"></p>
+            </div>
+            <div>
+                <label class="block text-xs font-bold uppercase text-slate-400 mb-2">Title</label>
+                {% render_field e_form.title class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition" placeholder="John" %}
+                <p id="error-title" class="text-red-600 text-sm mt-1"></p>    
+            </div>
+            <div>
+                <label class="block text-xs font-bold uppercase text-slate-400 mb-2">Start Date</label>
+                    {% render_field e_form.start class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition" placeholder="John" %}
+                    <p id="exp-error-start" class="text-red-600 text-sm mt-1"></p>
+            </div>
+            <div>
+                <label class="block text-xs font-bold uppercase text-slate-400 mb-2">End Date</label>
+                    {% render_field e_form.end class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition" placeholder="John" %}
+                    <p id="exp-error-end" class="text-red-600 text-sm mt-1"></p>
+            </div>
+            <div class="col-span-2">
+                <label class="block text-xs font-bold uppercase text-slate-400 mb-2">Description</label>
+                    {% render_field e_form.description class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition" placeholder="John" %}
+                    <p id="error-description" class="text-red-600 text-sm mt-1"></p>       
+             </div>
+            <button type="submit" class="col-span-2 w-full bg-blue-600 text-white font-bold py-3 rounded-xl hover:bg-blue-700 transition shadow-lg shadow-blue-100">Save Education</button>
+        </form>
+    </div>
+</div>
     
     <div class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
         <div class="h-32 bg-gradient-to-r from-blue-600 to-indigo-700 relative">
@@ -220,7 +259,7 @@
             <div class="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm">
                 <div class="flex items-center justify-between mb-8">
                     <h3 class="font-bold text-slate-800 text-lg">Work Experience</h3>
-                    <button class="text-blue-600 text-sm font-bold">Add Experience</button>
+                    <button onclick="toggleModal('experience-modal')" class="text-blue-600 text-sm font-bold">Add Experience</button>
                 </div>
                 
                 <div class="space-y-8 relative">
@@ -232,10 +271,10 @@
                             <img src="https://logo.clearbit.com/microsoft.com" alt="Microsoft">
                         </div>
                         <div>
-                            <h4 class="font-bold text-slate-800">Senior Software Engineer</h4>
-                            <p class="text-sm font-semibold text-blue-600">Microsoft • Full-time</p>
-                            <p class="text-xs text-slate-400 mt-1">Jan 2022 - Present • 4 yrs</p>
-                            <p class="text-sm text-slate-600 mt-3">Leading the development of cloud-based internal tools and managing a team of 5 developers.</p>
+                            <h4 class="font-bold text-slate-800">{{ exp.title}}</h4>
+                            <p class="text-sm font-semibold text-blue-600">{{ exp.company }} </p>
+                            <p class="text-xs text-slate-400 mt-1">{{ exp.start }} - {{ exp.end }} </p>
+                            <p class="text-sm text-slate-600 mt-3">{{ exp.discription }}</p>
                         </div>
                     </div>
                     {% endfor %}
@@ -276,6 +315,8 @@
 <script>
     const eduForm = document.getElementById("education-form");
     const eduModal = document.getElementById("education-modal");
+    const expForm = document.getElementById("experience-form");
+    const expModal = document.getElementById("experience-modal");
     // Toggle Modal
     function toggleModal(id) {
         document.getElementById(id).classList.toggle('hidden');
@@ -420,6 +461,49 @@ eduForm.addEventListener("submit", async function (e) {
     location.reload();
 });
 
+expForm.addEventListener("submit", async function (e) {
+    e.preventDefault();
+
+    // Clear old errors
+    expForm.querySelectorAll('[id^="error-"]').forEach(el => el.innerText = "");
+    expForm.querySelectorAll("input, textarea, select")
+        .forEach(el => el.classList.remove("border-red-500"));
+
+    const formData = new FormData(expForm);
+
+    const response = await fetch("{% url 'seeker:experience' %}", {
+        method: "POST",
+        headers: {
+            "X-CSRFToken": formData.get("csrfmiddlewaretoken")
+        },
+        body: formData
+    });
+
+    const data = await response.json();
+
+    // Validation failed → keep modal OPEN
+    if (!data.success) {
+        for (let field in data.errors) {
+            const errorEl = document.getElementById(`exp-error-${field}`);
+            if (errorEl) {
+                errorEl.innerText = data.errors[field][0];
+            }
+
+            const input = expForm.querySelector(`[name="${field}"]`);
+            if (input) {
+                input.classList.add("border-red-500");
+            }
+        }
+        return;
+    }
+
+    // ✅ Success
+    expForm.reset();
+    expModal.classList.add("hidden");
+
+    // OPTIONAL: reload or dynamically append education
+    location.reload();
+});
 
 </script>
 {% endblock %}

@@ -1,0 +1,82 @@
+{% extends 'main/index.html' %}
+{% load static %}
+
+{% block title %}Search Jobs | WorkFlow{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto px-4 py-10">
+    
+    <div class="mb-10">
+        <h1 class="text-3xl font-black text-slate-800">Find Your Next Role</h1>
+        <p class="text-slate-500">Explore opportunities from verified recruiters.</p>
+    </div>
+
+    <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm mb-10">
+        <form method="GET" action="{% url 'seeker:jobs' %}" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            
+            <div class="md:col-span-2 relative">
+                <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                <input type="text" name="q" value="{{ search_query }}" placeholder="Search Job Title or Company..." 
+                       class="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-blue-500 transition">
+            </div>
+
+            <div>
+                <select name="experience" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl outline-none appearance-none cursor-pointer">
+                    <option value="">Experience (All)</option>
+                    <option value="0-1" {% if exp_filter == "0-1" %}selected{% endif %}>0-1 Years</option>
+                    <option value="2-5" {% if exp_filter == "2-5" %}selected{% endif %}>2-5 Years</option>
+                    <option value="5+" {% if exp_filter == "5+" %}selected{% endif %}>5+ Years</option>
+                </select>
+            </div>
+
+            <button type="submit" class="bg-blue-600 text-white font-bold py-3 rounded-2xl hover:bg-blue-700 transition shadow-lg shadow-blue-100">
+                Search Jobs
+            </button>
+        </form>
+    </div>
+
+    <div class="space-y-4">
+        {% for item in jobs %}
+        <div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm hover:shadow-md hover:border-blue-200 transition group">
+            <div class="flex flex-col md:flex-row gap-6 items-center">
+                
+                <div class="w-16 h-16 rounded-2xl overflow-hidden bg-slate-50 border border-slate-100 flex items-center justify-center shrink-0">
+                    {% if item.recruter.logo %}
+                        <img src="{{ item.recruter.logo.url }}" class="w-full h-full object-cover">
+                    {% else %}
+                        <span class="text-blue-600 font-black text-xl">{{ item.recruter.company_name|slice:":1" }}</span>
+                    {% endif %}
+                </div>
+
+                <div class="flex-1 text-center md:text-left">
+                    <h3 class="text-xl font-bold text-slate-800 group-hover:text-blue-600 transition">{{ item.title }}</h3>
+                    <div class="flex flex-wrap justify-center md:justify-start gap-4 mt-2 text-sm text-slate-500 font-medium">
+                        <span class="text-blue-600"><i class="fa-solid fa-briefcase mr-1"></i> {{ item.recruter.company_name }}</span>
+                        <span><i class="fa-solid fa-user-gear mr-1"></i> {{ item.get_experience_display }}</span>
+                        <span><i class="fa-solid fa-wallet mr-1"></i> {{ item.salary|default:"Negotiable" }}</span>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-3">
+                    {% if item.id in applied_ids %}
+                        <span class="px-6 py-3 bg-emerald-50 text-emerald-600 font-bold rounded-xl text-sm border border-emerald-100">
+                            Applied
+                        </span>
+                    {% else %}
+                        <a href="{% url 'seeker:job_detials' item.id %}" class="bg-slate-900 text-white px-6 py-3 rounded-xl font-bold text-sm hover:bg-blue-600 transition">
+                            View Details
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="text-center py-20 bg-white rounded-3xl border border-dashed border-slate-200">
+            <i class="fa-solid fa-search text-slate-200 text-4xl mb-4"></i>
+            <p class="text-slate-400 italic">No jobs match your search.</p>
+            <a href="{% url 'seeker:jobs' %}" class="text-blue-600 font-bold underline mt-2 inline-block">Clear All Filters</a>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

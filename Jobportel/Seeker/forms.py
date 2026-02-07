@@ -3,6 +3,7 @@ from .models import seeker
 from django.core.exceptions import ValidationError
 import re
 import datetime
+from datetime import date
 from django.utils import timezone
 
 
@@ -126,6 +127,45 @@ class education_form(forms.Form):
         end = cleaned_data.get("end")
 
         if start and start > datetime.date.today():
+            self.add_error("start", "Enter a valid date")
+
+        if start and end and end < start:
+            self.add_error("end", "Enter a valid date")
+        return cleaned_data
+
+class experience_form(forms.Form):
+    company = forms.CharField( max_length=30, required=True)
+    title = forms.CharField(max_length=50,required=True)
+    description = forms.CharField(widget=forms.Textarea,required=False)
+    start = forms.DateField(widget=forms.DateInput(attrs={'type':'date'}),required=True)
+    end = forms.DateField(widget=forms.DateInput(attrs={'type':'date'}),required=False)
+
+    def clean_company(self):
+        company=self.cleaned_data.get('company')
+        if company and len(company) < 2:
+            self.add_error("company", "Enter a valid company")
+        return company
+
+    def clean_title(self):
+        title = self.cleaned_data.get('title')
+        if title and len(title) < 2:
+            self.add_error("title", "Enter a valid title")
+        return title 
+
+    def clean_description(self):
+        des=self.cleaned_data.get('description')
+        if des and len(des) < 10:
+            self.add_error("description","Description must be atleast 10 characters Long")
+        return des
+
+
+    def clean(self):
+        print("CLEAN() IS RUNNING")
+        cleaned_data = super().clean()
+        start = cleaned_data.get("start")
+        end = cleaned_data.get("end")
+
+        if start and start > date.today():
             self.add_error("start", "Enter a valid date")
 
         if start and end and end < start:

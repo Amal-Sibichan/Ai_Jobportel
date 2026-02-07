@@ -7,15 +7,17 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.views.decorators.http import require_POST, require_http_methods
 from numpy import info
-from .models import Experience, seeker,skill,Education,resume,application
-from .forms import profileupdateform,upload_resume,education_form
+from .models import *
+from .forms import profileupdateform,upload_resume,education_form,experience_form
 from .utils import extract,entity_score_spacy,atscore,pool_score,semantic_similarity,jaccard_skill_score,generate_vector
 from .LLM import extract_skills_llm
-from recruiter.models import job
+from recruiter.models import *
+from django.db.models import Q
 # Create your views here.
 @login_required
 def seeker_home(request):
     seeker_obj = seeker.objects.get(user=request.user)
+    
 
     jobs = job.objects.select_related('recruter').all()
     return render(request,'main/home.html',{'seeker':seeker_obj,'jobs':jobs})
@@ -28,8 +30,9 @@ def profile(request):
     Education=seeker.education.all()
     skills=seeker.skills.all()
     edu_form = education_form()
+    exp_form = experience_form()
     
-    return render(request,'seeker/profile.html',{'user':user,'skills':skills,'form':edu_form,'education':Education,'experiences':Experiences})
+    return render(request,'seeker/profile.html',{'user':user,'skills':skills,'form':edu_form,'e_form':exp_form,'education':Education,'experiences':Experiences})
 
 @login_required
 @require_POST
@@ -98,7 +101,9 @@ def profileupdate(request):
                 current_seeker.image = request.FILES['image']
             
             current_seeker.save()
-            return HttpResponse("Profile Updated ")
+            messages.success(request, '  Profile Updated !')
+
+            return redirect('profile')
     else:
         form = profileupdateform(initial={
             'first_name': request.user.first_name,
@@ -170,7 +175,7 @@ def job_application(request,job_id):
     return redirect('seeker:seeker_page')
 
 
-
+@login_required
 def add_education(request):
     user_instance=seeker.objects.get(user=request.user)
     if request.method == "POST":
@@ -204,5 +209,78 @@ def add_education(request):
         form=education_form()
         return render(request,'seeker/profile.html',{'form':form})
 
+
+@login_required
+@require_POST
 def add_experience(request):
-    pass
+    user_instance=seeker.objects.get(user=request.user)
+    form=experience_form(request.POST)
+    if form.is_valid():
+            Experience.objects.create(
+                seeker=user_instance,
+                company=form.cleaned_data["company"],
+                title=form.cleaned_data["title"],
+                start=form.cleaned_data["start"],
+                end=form.cleaned_data["end"],
+                description=form.cleaned_data["description"],
+            )
+            return JsonResponse(
+                {
+                    "success": True,
+                    "message": "Experience added successfully"
+                },
+                status=201
+            )
+            
+    return JsonResponse(
+                {
+                    "success": False,
+                    "errors": form.errors
+                },
+                status=400
+            )
+
+from django.shortcuts import render
+from django.db.models import Q
+from .models import job
+
+@login_required
+def jobs(request):
+    # Start with all jobs
+    job_list = job.objects.all().order_by('-created_at')
+
+    # Get search parameters from the URL (GET request)
+    exp_filter = request.GET.get('experience', '').strip()
+
+    # Apply text search if query exists
+    search_query = request.GET.get('q', '')
+    if search_query:
+        job_list = job_list.filter(
+            Q(title__icontains=search_query) | 
+            Q(recruter__company_name__icontains=search_query)
+        )
+
+    # Apply experience filter if selected
+    if exp_filter and exp_filter != "":
+        job_list = job_list.filter(experience=exp_filter)
+
+    context = {
+        'jobs': job_list,
+        'search_query': search_query,
+        'exp_filter': exp_filter,
+    }
+    return render(request, 'seeker/jobs.html', context)
+
+
+def job_detials(request,jobid):
+    has_applied=False
+    user=seeker.objects.get(user=request.user)
+    job_instance = job.objects.get(id=jobid)
+    if application.objects.filter(seeker=user,job=job_instance).exists():
+        has_applied=True
+    
+    context = {
+        'job': job_instance,
+        'has_applied':has_applied
+    }
+    return render(request, 'seeker/jobdetails.html', context)

@@ -1,0 +1,123 @@
+{% extends 'main/index.html' %}
+{% load static %}
+
+{% block title %}{{ job.title }} | Details{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto px-4 py-10">
+    
+    <a href="{% url 'seeker:jobs' %}" class="inline-flex items-center text-slate-500 hover:text-blue-600 font-bold mb-8 transition">
+        <i class="fa-solid fa-arrow-left mr-2"></i> Back to Listings
+    </a>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        
+        <div class="lg:col-span-2 space-y-8">
+            
+            <div class="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm">
+                <div class="flex flex-col md:flex-row gap-6 items-start">
+                    <div class="w-20 h-20 bg-blue-50 rounded-2xl flex items-center justify-center shrink-0 border border-blue-100">
+                        {% if job.recruter.logo %}
+                            <img src="{{ job.recruter.logo.url }}" class="w-full h-full object-cover rounded-2xl">
+                        {% else %}
+                            <span class="text-blue-600 font-black text-2xl">{{ job.recruter.company_name|slice:":1" }}</span>
+                        {% endif %}
+                    </div>
+                    <div class="flex-1">
+                        <h1 class="text-3xl font-black text-slate-800 mb-2">{{ job.title }}</h1>
+                        <p class="text-blue-600 font-bold text-lg mb-4">{{ job.recruter.company_name }}</p>
+                        
+                        <div class="flex flex-wrap gap-3">
+                            <span class="px-3 py-1 bg-slate-100 text-slate-600 rounded-lg text-xs font-bold uppercase">
+                                <i class="fa-solid fa-clock mr-1"></i> {{ job.get_experience_display }}
+                            </span>
+                            <span class="px-3 py-1 bg-emerald-50 text-emerald-600 rounded-lg text-xs font-bold uppercase">
+                                <i class="fa-solid fa-wallet mr-1"></i> {{ job.salary|default:"Competitive" }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm">
+                <h3 class="text-xl font-bold text-slate-800 mb-4">Job Description</h3>
+                <div class="text-slate-600 leading-relaxed space-y-4">
+                    {{ job.discription|linebreaks }}
+                </div>
+
+                <h3 class="text-xl font-bold text-slate-800 mt-10 mb-4">Key Responsibilities</h3>
+                <div class="text-slate-600 leading-relaxed">
+                    {{ job.responsablity|linebreaks }}
+                </div>
+            </div>
+
+            <div class="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm">
+                <h3 class="text-xl font-bold text-slate-800 mb-6">Skills & Tools</h3>
+                <div class="flex flex-wrap gap-3">
+                    {% for skill in job.skills %}
+                        <span class="px-4 py-2 bg-blue-50 text-blue-700 rounded-xl text-sm font-bold border border-blue-100">
+                            {{ skill }}
+                        </span>
+                    {% empty %}
+                        <p class="text-slate-400 italic">No specific skills listed.</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <aside class="space-y-6">
+            <div class="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm sticky top-10">
+                <div class="space-y-6">
+                    <div>
+                        <p class="text-xs font-bold uppercase text-slate-400 mb-2">Application Deadline</p>
+                        <p class="text-slate-800 font-bold">
+                            {% if job.due %}
+                                {{ job.due|date:"d M, Y" }}
+                            {% else %}
+                                Not specified
+                            {% endif %}
+                        </p>
+                    </div>
+
+                    <hr class="border-slate-100">
+
+                    <div>
+                        <p class="text-xs font-bold uppercase text-slate-400 mb-2">Required Education</p>
+                        <p class="text-slate-800 font-bold">{{ job.education|default:"Open to all" }}</p>
+                    </div>
+
+                    <div class="pt-4">
+                        {% if is_expired %}
+                            <button disabled class="w-full bg-slate-200 text-slate-500 font-bold py-4 rounded-2xl cursor-not-allowed">
+                                Application Closed
+                            </button>
+                        {% elif has_applied %}
+                        <a href="#" class="block w-full text-center bg-blue-600 text-white font-bold py-4 rounded-2xl hover:bg-blue-700 transition shadow-lg shadow-blue-100">
+                                View Applicatiion Status
+                            </a>
+                        {% else %}
+                            <a href="{% url 'seeker:application' job.id %}" class="block w-full text-center bg-blue-600 text-white font-bold py-4 rounded-2xl hover:bg-blue-700 transition shadow-lg shadow-blue-100">
+                                Apply for Job
+                            </a>
+                        {% endif %}
+                        <a href="#" class="block w-full text-center bg-white text-slate-700 font-bold py-4 rounded-2xl border border-slate-200 hover:bg-gray-50 transition">
+                            <i class="fa-regular fa-bookmark mr-2"></i> Save Job
+                        </a>
+                    </div>
+                </div>
+
+                <div class="mt-10 pt-8 border-t border-slate-100">
+                    <h4 class="font-bold text-slate-800 mb-4">About the Company</h4>
+                    <p class="text-sm text-slate-600 line-clamp-3 mb-4">
+                        {{ job.recruter.decription|truncatewords:30 }}
+                    </p>
+                    <a href="{{ job.recruter.website }}" target="_blank" class="text-blue-600 text-sm font-bold hover:underline">
+                        Visit Website <i class="fa-solid fa-up-right-from-square ml-1 text-[10px]"></i>
+                    </a>
+                </div>
+            </div>
+        </aside>
+
+    </div>
+</div>
+{% endblock %}

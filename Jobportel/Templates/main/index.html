@@ -32,11 +32,12 @@
                 <span class="hidden lg:block">Home</span>
             </a>
             {% endif %}
-            <a href="/explore" class="flex items-center gap-4 p-3 text-slate-500 hover:bg-slate-50 rounded-xl transition">
+            
+            {% if request.user.seeker %}
+            <a href="{% url 'seeker:jobs' %}" class="flex items-center gap-4 p-3 text-slate-500 hover:bg-slate-50 rounded-xl transition">
                 <i class="fa-solid fa-compass text-xl"></i>
                 <span class="hidden lg:block">Discover</span>
             </a>
-            {% if request.user.seeker %}
             <a href="{% url 'seeker:profile' %}" class="flex items-center gap-4 p-3 text-slate-500 hover:bg-slate-50 rounded-xl transition">
                 <i class="fa-solid fa-compass text-xl"></i>
                 <span class="hidden lg:block">Profile</span>
@@ -69,10 +70,9 @@
             <div class="max-w-4xl mx-auto flex items-center gap-6">
                 <div class="flex-1 relative">
                     <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-slate-400">
-                        <i class="fa-solid fa-magnifying-glass"></i>
+                        
                     </span>
-                    <input type="text" placeholder="Search jobs, companies..." 
-                           class="w-full pl-11 pr-4 py-2.5 bg-slate-100 border-none rounded-2xl focus:ring-2 focus:ring-blue-500 outline-none text-sm">
+                    
                 </div>
                 
                 <div class="flex items-center gap-3">
