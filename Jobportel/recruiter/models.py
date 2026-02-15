@@ -5,7 +5,22 @@ from huggingface_hub import Organization
 from spacy import blank, registrations
 from django.contrib.auth.models import User
 from pgvector.django import VectorField
+# recruiter/models.py
 
+class Plan(models.Model):
+    name = models.CharField(max_length=50)   # Free / Basic / Premium
+    price = models.PositiveIntegerField()    # in rupees
+    duration = models.PositiveBigIntegerField(null=True,blank=True)
+    job_limit = models.PositiveIntegerField(null=True,blank=True)
+    resume_pooling = models.BooleanField(default=False)
+    ai_chat = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.name} - ₹{self.price}"
+        
 class Recruter(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     company_name=models.CharField(max_length=200)
@@ -21,6 +36,7 @@ class Recruter(models.Model):
     approval_status=models.CharField(max_length=20,choices=[("PENDING","Pending"),("APPROVED","Approved"),("REJECTED","Rejected")],default="PENDING")
     sub_status = models.CharField(max_length=20,choices=[("FREE","Free"),("PENDING_PAYMENT","Pending_payment"),("ACTIVE","Active"),("EXPIRED","Expired")],default="FREE")
     sub_due = models.DateField(null=True,blank=True)
+    plan = models.ForeignKey(Plan,on_delete=models.SET_NULL,null=True,blank=True)
     created_at = models.DateField(auto_now_add=True) 
     def is_profile_complete(self):
         required_fields = [
@@ -94,4 +110,5 @@ class job(models.Model):
 
 
     
+
 

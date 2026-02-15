@@ -1,9 +1,10 @@
 from django.http import HttpResponse
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib.admin.views.decorators import staff_member_required
 from Seeker.models import seeker
 from recruiter.models import Recruter, documents
 from django.contrib.auth.models import User
+from django.contrib import messages
 @staff_member_required
 def admin_home(request):
     total_seekers = seeker.objects.count()
@@ -41,7 +42,8 @@ def update(request,r_id):
         if docs.is_documents_complete() and docs.all_documents_verified():
             recruter_instance.approval_status = "APPROVED"
             recruter_instance.save()
+            messages.success(request,'User Approved')
         else:
             recruter_instance.approval_status = "PENDING"
             recruter_instance.save()
-    return HttpResponse("saved sucessfully")
+    return redirect('Superuser:admin_home')

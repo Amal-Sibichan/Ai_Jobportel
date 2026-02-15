@@ -31,6 +31,11 @@
                 <i class="fa-solid fa-house text-xl text-blue-600"></i>
                 <span class="hidden lg:block">Home</span>
             </a>
+            {% else %}
+            <a href="/" class="flex items-center gap-4 p-3 rounded-xl transition hover:bg-slate-50">
+                <i class="fa-solid fa-house text-xl text-blue-600"></i>
+                <span class="hidden lg:block">Home</span>
+            
             {% endif %}
             
             {% if request.user.seeker %}
@@ -50,6 +55,16 @@
             <a href="{% url 'recruiter:upload_docs' %}" class="flex items-center gap-4 p-3 text-slate-500 hover:bg-slate-50 rounded-xl transition">
                 <i class="fa-solid fa-file-invoice text-xl"></i>
                 <span class="hidden lg:block">Upload Documents</span>
+            </a>
+            <a href="{% url 'recruiter:subscription' %}" class="flex items-center gap-4 p-3 text-slate-500 hover:bg-slate-50 rounded-xl transition">
+                <i class="fa-solid fa-compass text-xl"></i>
+                <span class="hidden lg:block">Subscriptions</span>
+            </a>
+            {% else %}
+            <a href="{% url 'recruiter:add_Plan'%}" class="flex items-center gap-4 p-3 text-slate-500 hover:bg-slate-50 rounded-xl transition">
+                <i class="fa-solid fa-compass text-xl"></i>
+                <span class="hidden lg:block">Subscription plan</span>
+            </a>
             </a>
             {% endif %}
 

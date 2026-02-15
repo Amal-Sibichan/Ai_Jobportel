@@ -101,3 +101,6 @@ class application(models.Model):
 
     def __str__(self):
         return f"{self.seeker.user.username} - {self.job.title}"
+
+
+

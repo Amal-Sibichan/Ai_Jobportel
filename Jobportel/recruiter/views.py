@@ -1,16 +1,21 @@
 from django.shortcuts import redirect,render,get_object_or_404
-from recruiter.models import Recruter,documents,job
-from Seeker.models import Education, seeker,resume,application,Experience
-from django.contrib.auth.models import User
+from recruiter.models import *
+from Seeker.models import *
+from django.contrib.auth.models import *
 from django.contrib.auth.decorators import login_required,user_passes_test
+from django.contrib.admin.views.decorators import staff_member_required
 from django.views.decorators.http import require_POST, require_http_methods
 from Seeker.utils import extract,entity_score_spacy,atscore,pool_score,semantic_similarity,jaccard_skill_score,generate_vector
 from Seeker.LLM import resume_bot
-from .forms import recruter_form,DocumentUploadForm,job_form
+from .forms import *
 from django.http import HttpResponse,JsonResponse
 from django.contrib import messages
 import datetime
 import json
+import razorpay
+from django.conf import settings
+from datetime import timedelta
+from django.utils import timezone
 
 def is_recruter(user):
     return hasattr(user, 'recruter')
@@ -56,6 +61,8 @@ def recruter_update(request):
             current_recruter.industry = form.cleaned_data['industry']
             current_recruter.size = form.cleaned_data['size']
             current_recruter.Organization_type = form.cleaned_data['Organization_type']
+            if 'logo' in request.FILES:
+                current_recruter.logo = request.FILES['logo']
             current_recruter.save()
             messages.success(request, 'Login successful!')
             return redirect('recruiter:recruter_profile')
@@ -99,7 +106,8 @@ def upload_docs(request):
             docs.pan_verified = False
             docs.address_proof_verified = False
             docs.save()
-            return HttpResponse("Documents Uploaded")
+            messages.success(request,'Documents uploaded. Wait for admin approvel ')
+            return redirect('recruiter:upload_docs')
     else:
         form=DocumentUploadForm()
     return render(request, 'recruter_temp/upload_docs.html',{'form':form,'docs':docs})
@@ -107,7 +115,13 @@ def upload_docs(request):
 @login_required
 @user_passes_test(is_recruter, login_url='/access-denied/')
 def post_job(request):
-    current_recruter=Recruter.objects.get(user=request.user)
+    
+    try:
+        current_recruter = Recruter.objects.get(user=request.user)
+    except Recruter.DoesNotExist:
+        messages.warning(request, "Please complete your recruiter profile first.")
+        
+
     docs=documents.objects.get(recruter=current_recruter)
     if not current_recruter.is_profile_complete():
         messages.warning(request, "Please fill in all company details.")
@@ -171,6 +185,13 @@ def job_list(request):
 @login_required
 @user_passes_test(is_recruter, login_url='/access-denied/')
 def candidate_pool(request,job_id):
+    current_recruter=Recruter.objects.get(user=request.user)
+    if not check_subscription(current_recruter):
+        messages.error(request, "Your subscription has expired. Please renew.")
+        return redirect("recruiter:subscription")
+    if not current_recruter.plan.resume_pooling:
+        return redirect('recruiter:list',job_id=job_id)
+
     target_job = get_object_or_404(job, id=job_id)
     app_data=application.objects.filter(job_id=job_id).select_related('seeker__user','job')
     count={
@@ -185,6 +206,7 @@ def candidate_pool(request,job_id):
 @login_required
 @user_passes_test(is_recruter, login_url='/access-denied/')
 def candidate_details(request,candidate_id,job_id):
+    recruiter = Recruter.objects.get(user=request.user)
     candidate = get_object_or_404(seeker, id=candidate_id)
     jobs = get_object_or_404(job, id=job_id)
     app = get_object_or_404(application, seeker=candidate, job=jobs)
@@ -192,7 +214,7 @@ def candidate_details(request,candidate_id,job_id):
     education = Education.objects.filter(seeker=candidate).order_by("id").first()
     matched = app.matched_skills.split(", ") if app.matched_skills else []
     unmatched = app.unmatched_skills.split(", ") if app.unmatched_skills else []
-    return render(request,'recruter_temp/candidate_details.html',{'candidate':candidate,'job':jobs,'app':app,'matched':matched,'unmatched':unmatched,'edu':education,'exp':experience})
+    return render(request,'recruter_temp/candidate_details.html',{'candidate':candidate,'job':jobs,'app':app,'matched':matched,'unmatched':unmatched,'edu':education,'exp':experience,'recruter':recruiter})
 
 def ask_bot(request):
     if request.method == "POST":
@@ -230,3 +252,157 @@ def ask_bot(request):
             return JsonResponse({'reply': f"I'm sorry, I encountered an error: {str(e)}"}, status=500)
 
     return JsonResponse({'reply': "Invalid Request"}, status=400)
+
+
+def shorlist(request,app_id):
+    app = application.objects.select_related('job', 'seeker', 'seeker__user').get(id=app_id)
+    job_id = app.job_id
+    user_id = app.seeker_id
+    app.status = "SHORTLISTED"
+    app.save()
+    return redirect('recruiter:candidate_details', candidate_id=user_id,job_id=job_id)
+
+def  Reject(request,app_id):
+    app = application.objects.select_related('job', 'seeker', 'seeker__user').get(id=app_id)
+    job_id = app.job_id
+    user_id = app.seeker_id
+    app.status = "REJECTED"
+    app.save()
+    return redirect('recruiter:candidate_details', candidate_id=user_id,job_id=job_id)
+
+
+
+@staff_member_required
+def add_plan(request):
+    if request.method == "POST":
+        form = PlanForm(request.POST)
+        if form.is_valid():
+            # Manually saving the data into the model
+            Plan.objects.create(
+                name=form.cleaned_data['name'],
+                price=form.cleaned_data['price'],
+                job_limit=form.cleaned_data['job_limit'],
+                duration=form.cleaned_data['duration'],
+                resume_pooling=form.cleaned_data['resume_pooling'],
+                ai_chat=form.cleaned_data['ai_chat'],
+                is_active=form.cleaned_data['is_active'],
+            )
+            messages.success(request,'Plan added')
+            return redirect('recruiter:add_Plan')
+    else:
+        form = PlanForm()
+    
+    return render(request, 'admin/add_Plan.html', {'form': form})
+
+
+def subscription(request):
+    plans=Plan.objects.all()
+    return render(request,'Recruter_temp/subscription.html',{'plans':plans})   
+
+
+
+
+@login_required
+@user_passes_test(is_recruter, login_url='/access-denied/')
+def create_payment(request,plan_id):
+    request.session["plan_id"] = plan_id
+    plan = Plan.objects.get(id=plan_id)
+
+    if plan.price == 0:
+        # FREE plan
+        recruiter = Recruter.objects.get(user=request.user)
+        recruiter.sub_status = "ACTIVE"
+        recruiter.sub_due = None
+        recruiter.plan = plan
+        recruiter.save()
+        return redirect("recruitr:recruter_page")
+
+    amount = plan.price * 100  # Razorpay uses paise
+
+    client = razorpay.Client(
+        auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET)
+    )
+
+    order = client.order.create({
+        "amount": amount,
+        "currency": "INR",
+        "payment_capture": "1"
+    })
+
+    return render(request, "Recruter_temp/payment.html", {
+        "order_id": order["id"],
+        "amount": amount,
+        "key": settings.RAZORPAY_KEY_ID
+    })
+
+
+@login_required
+@user_passes_test(is_recruter, login_url='/access-denied/')
+def payment_success(request):
+    plan_id = request.session.get("plan_id")
+    plan = Plan.objects.get(id=plan_id)
+
+    recruiter = Recruter.objects.get(user=request.user)
+
+    recruiter.sub_status = "ACTIVE"
+    recruiter.sub_due = timezone.now().date() + timedelta(days=plan.duration)
+    recruiter.plan = plan
+    recruiter.save()
+
+    del request.session["plan_id"]
+
+    return render(request, "Recruter_temp/payment_success.html",{'plan':plan})
+
+
+
+def check_subscription(recruiter):
+    if recruiter.sub_status != "ACTIVE":
+        return False
+
+    if recruiter.sub_due and recruiter.sub_due < timezone.now().date():
+        recruiter.sub_status = "FREE"
+        recruiter.sub_due = None
+        recruiter.save()
+        return False
+    
+    
+
+    return True
+
+
+def subscription_detials(request):
+    current_recruter=Recruter.objects.get(user=request.user)
+    jobs_posted = job.objects.filter(recruter=current_recruter).count()
+    
+    # Calculate progress bar percentage
+    if current_recruter.plan and current_recruter.plan.job_limit:
+        usage_percent = (jobs_posted / recruiter.plan.job_limit) * 100
+    else:
+        usage_percent = 0
+
+    return render(request, 'Recruter_temp/subscription_detials.html', {
+        'recruiter': current_recruter,
+        'jobs_posted': jobs_posted,
+        'usage_percent': usage_percent,
+    })
+
+
+def list(request,job_id):
+    recruiter = get_object_or_404(Recruter, user=request.user)
+
+    # Get the job (ensure it belongs to this recruiter)
+    job_obj = get_object_or_404(job, id=job_id, recruter=recruiter)
+
+    # Get all applications for this job
+    applications = (
+        application.objects
+        .filter(job=job_obj)
+        .select_related("seeker", "seeker__user")
+    )
+
+    context = {
+        "job": job_obj,
+        "applications": applications,
+    }
+    return render(request,'Recruter_temp/list.html',context)
+

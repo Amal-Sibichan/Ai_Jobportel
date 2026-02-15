@@ -11,7 +11,7 @@ class recruter_form(forms.Form):
     last_name = forms.CharField(max_length=100, required=False)
     email = forms.EmailField(required=False)
 
-    image = forms.ImageField(required=False)
+    logo = forms.ImageField(required=False)
     company_name=forms.CharField(max_length=20,required=True)
     company_email=forms.EmailField(required=False)
     website=forms.URLField(required=False)
@@ -116,4 +116,16 @@ class job_form(forms.Form):
     def clean(self):
         cleaned_data = super().clean()
         return cleaned_data
+
+class PlanForm(forms.Form):
+    name = forms.CharField(max_length=50, label="Plan Name")
+    price = forms.IntegerField(min_value=0, label="Price (₹)")
+    job_limit = forms.IntegerField(min_value=1, label="Job Limit",required=False)
+    duration = forms.IntegerField(label="Duration",required=False)
+    resume_pooling = forms.BooleanField(required=False, label="Resume Pooling")
+    ai_chat = forms.BooleanField(required=False, label="AI Chat Bot")
+    is_active = forms.BooleanField(required=False, initial=True, label="Is Active")
+
+    def clean(self):
+        return super().clean()
 

@@ -13,7 +13,7 @@ urlpatterns = [
     path('seeker/add_education',views.add_education,name='education'),
     path('seeker/add_experience',views.add_experience,name='experience'),
     path('seeker/jobs',views.jobs,name='jobs'),
-    path('seeker/job_detials/<int:jobid>/',views.job_detials,name='job_detials')
+    path('seeker/job_detials/<int:jobid>/',views.job_detials,name='job_detials'),
     
 
 

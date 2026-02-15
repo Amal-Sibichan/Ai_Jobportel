@@ -1,0 +1,126 @@
+{% extends 'main/index.html' %}
+{% load static %}
+
+{% block title %}Applicants: {{ job.title }}{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-slate-50/50 py-10 px-4">
+    <div class="max-w-7xl mx-auto">
+        
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-10">
+            <div>
+                <nav class="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-2">
+                    <a href="{% url 'recruiter:recruter_page' %}" class="hover:text-blue-600">Dashboard</a>
+                    <i class="fa-solid fa-chevron-right text-[8px]"></i>
+                    <span class="text-blue-600">Applicant Tracking</span>
+                </nav>
+                <h1 class="text-3xl font-black text-slate-900 tracking-tight">{{ job.title }}</h1>
+                <p class="text-slate-500 text-sm mt-1 font-medium">
+                    Managing <span class="text-slate-900 font-bold">{{ applications.count }} applications</span> for this role.
+                </p>
+            </div>
+            
+            <div class="flex items-center gap-3">
+                <button class="bg-white text-slate-700 px-5 py-3 rounded-2xl font-bold border border-slate-200 hover:bg-slate-50 transition shadow-sm text-xs flex items-center gap-2">
+                    <i class="fa-solid fa-filter"></i> Filter
+                </button>
+                <button class="bg-slate-900 text-white px-6 py-3 rounded-2xl font-bold hover:bg-blue-600 transition shadow-xl shadow-slate-200 text-xs flex items-center gap-2">
+                    <i class="fa-solid fa-file-export"></i> Download CSV
+                </button>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-[2.5rem] border border-slate-200 shadow-sm overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-slate-50/50 text-slate-400 text-[10px] font-black uppercase tracking-widest border-b border-slate-100">
+                            <th class="px-8 py-5">Candidate</th>
+                            <th class="px-8 py-5">Match Score</th>
+                            <th class="px-8 py-5">Contact</th>
+                            <th class="px-8 py-5">Applied Date</th>
+                            <th class="px-8 py-5">Status</th>
+                            <th class="px-8 py-5 text-right">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-50">
+                        {% for app in applications %}
+                        <tr class="group hover:bg-blue-50/30 transition-all duration-200">
+                            <td class="px-8 py-5">
+                                <div class="flex items-center gap-4">
+                                    <div class="w-11 h-11 rounded-2xl border-2 border-white shadow-sm overflow-hidden bg-slate-100 shrink-0">
+                                        {% if app.seeker.image %}
+                                            <img src="{{ app.seeker.image.url }}" class="w-full h-full object-cover">
+                                        {% else %}
+                                            <img src="https://ui-avatars.com/api/?name={{ app.seeker.user.first_name }}&background=f1f5f9&color=64748b" class="w-full h-full">
+                                        {% endif %}
+                                    </div>
+                                    <div>
+                                        <p class="font-bold text-slate-800 text-sm leading-none">{{ app.seeker.user.first_name }} {{ app.seeker.user.last_name }}</p>
+                                        <p class="text-[10px] text-slate-400 font-bold mt-1.5 uppercase tracking-tighter">{{ app.seeker.headline|default:"Software Engineer"|truncatechars:25 }}</p>
+                                    </div>
+                                </div>
+                            </td>
+
+                            <td class="px-8 py-5">
+                                <div class="flex items-center gap-2">
+                                    <div class="w-10 h-1 bg-slate-100 rounded-full overflow-hidden">
+                                        <div class="h-full bg-blue-600 w-[85%]"></div>
+                                    </div>
+                                    <span class="text-xs font-black text-blue-600 italic">{{ app.final_score }}</span>
+                                </div>
+                            </td>
+
+                            <td class="px-8 py-5">
+                                <p class="text-xs font-bold text-slate-600">{{ app.seeker.user.email }}</p>
+                                <p class="text-[10px] text-slate-400 mt-1">{{ app.seeker.phone }}</p>
+                            </td>
+
+                            <td class="px-8 py-5">
+                                <p class="text-xs font-bold text-slate-500">{{ app.created_at|date:"d M, Y" }}</p>
+                            </td>
+
+                            <td class="px-8 py-5">
+                                <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-50 text-amber-600 rounded-full text-[9px] font-black uppercase tracking-tighter border border-amber-100">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                                    In Review
+                                </span>
+                            </td>
+
+                            <td class="px-8 py-5 text-right">
+                                <div class="flex justify-end gap-2">
+                                    <a href="{{app.seeker.resume.resume.url}}" class="p-2.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition" title="View Resume">
+                                        <i class="fa-solid fa-file-invoice text-sm"></i>
+                                    </a>
+                                    {% if app.status == 'PENDING' %}
+                                    <a href="{% url 'recruiter:shortlist' app.id %}" class="p-2.5 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-xl transition" title="Shortlist">
+                                        <i class="fa-solid fa-circle-check text-sm"></i>
+                                    </a>
+                                    <a href="{% url 'recruiter:Reject' app.id %}" class="p-2.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition" title="Reject">
+                                        <i class="fa-solid fa-circle-xmark text-sm"></i>
+                                    </a>
+                                    {% elif app.status == 'REJECTED'  %}
+                                    <p class="px-10 py-4 bg-white border-2 border-rose-100 text-rose-500 font-black rounded-2xl hover:bg-rose-50 transition text-xs uppercase tracking-widest">{{app.status}}</p>
+                                    {% else %}
+                                    <p class="px-10 py-4 bg-white border-2 border-rose-100 text-rose-500 font-black rounded-2xl hover:bg-rose-50 transition text-xs uppercase tracking-widest">{{app.status}}</p>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" class="px-8 py-20 text-center">
+                                <div class="flex flex-col items-center">
+                                    <i class="fa-solid fa-user-secret text-slate-200 text-5xl mb-4"></i>
+                                    <p class="text-slate-400 font-bold tracking-tight">No applicants found for this position yet.</p>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

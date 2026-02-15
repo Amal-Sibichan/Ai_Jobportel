@@ -5,7 +5,7 @@
 <div class="min-h-screen bg-slate-50 py-10 px-4">
     <div class="max-w-6xl mx-auto">
         <nav class="flex mb-8 text-[10px] font-black uppercase tracking-widest text-slate-400">
-            <a href="#" class="hover:text-blue-600 transition">Dashboard</a>
+            <a href="{% url 'recruiter:recruter_page' %}" class="hover:text-blue-600 transition">Dashboard</a>
             <span class="mx-3">/</span>
             <a href="#" class="hover:text-blue-600 transition">Applications</a>
             <span class="mx-3">/</span>
@@ -15,15 +15,15 @@
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
             
             <div class="lg:col-span-4 space-y-6">
-                <div class="bg-white rounded-3xl shadow-sm p-8 border border-slate-200 text-center relative overflow-hidden">
-                    <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 to-indigo-600"></div>
+                <div class="bg-white rounded-[2.5rem] shadow-sm p-8 border border-slate-200 text-center relative overflow-hidden">
+                    <div class="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-blue-500 to-indigo-600"></div>
                     
                     <div class="w-24 h-24 bg-slate-100 text-slate-400 rounded-3xl flex items-center justify-center mx-auto mb-6 text-3xl font-bold border border-slate-100">
                         {{ candidate.user.first_name|slice:":1" }}{{ candidate.user.last_name|slice:":1" }}
                     </div>
                     
                     <h1 class="text-2xl font-black text-slate-800 tracking-tight">{{candidate.user.first_name}} {{candidate.user.last_name}}</h1>
-                    <p class="text-sm font-bold text-blue-600 uppercase tracking-tighter mb-6">{{candidate.headline|default:"Senior Developer"}}</p>
+                    <p class="text-sm font-bold text-blue-600 uppercase tracking-tighter mb-6">{{candidate.headline|default:"Candidate Profile"}}</p>
                     
                     <div class="relative w-36 h-36 mx-auto mb-6">
                         <svg class="w-full h-full -rotate-90" viewBox="0 0 36 36">
@@ -33,13 +33,13 @@
                         </svg>
                         <div class="absolute inset-0 flex flex-col items-center justify-center">
                             <span class="text-3xl font-black text-slate-800">{{app.final_score|floatformat:0}}%</span>
-                            <span class="text-[9px] uppercase text-slate-400 font-black tracking-widest">FIT</span>
+                            <span class="text-[9px] uppercase text-slate-400 font-black tracking-widest">FIT SCORE</span>
                         </div>
                     </div>
 
-                    <div class="pt-6 border-t border-slate-50 space-y-3">
+                    <div class="pt-6 border-t border-slate-50">
                         <div class="flex items-center justify-between text-xs">
-                            <span class="text-slate-400 font-bold uppercase">Application Status</span>
+                            <span class="text-slate-400 font-bold uppercase tracking-tighter">Status</span>
                             <span class="px-3 py-1 font-black uppercase text-[9px] rounded-full 
                                 {% if app.status == 'SHORTLISTED' %}bg-emerald-50 text-emerald-600
                                 {% elif app.status == 'REJECTED' %}bg-rose-50 text-rose-600
@@ -50,43 +50,27 @@
                     </div>
                 </div>
 
-                <div class="bg-white rounded-3xl shadow-sm p-6 border border-slate-200">
-                    <h3 class="text-xs font-black text-slate-400 uppercase tracking-widest mb-6 border-b border-slate-50 pb-3">Scoring Breakdown</h3>
-                    <div class="space-y-4">
-                        <div class="space-y-1">
-                            <div class="flex justify-between text-[10px] font-bold uppercase">
-                                <span class="text-slate-500">Skill Score</span>
-                                <span class="text-slate-800">{{app.skill_score}}%</span>
+                <div class="bg-white rounded-[2.5rem] shadow-sm p-8 border border-slate-200">
+                    <h3 class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-8">Metrics Analysis</h3>
+                    <div class="space-y-6">
+                        {% for label, score, color in metrics %}
+                        <div class="space-y-2">
+                            <div class="flex justify-between text-[10px] font-black uppercase tracking-widest">
+                                <span class="text-slate-500">{{ label }}</span>
+                                <span class="text-slate-900">{{ score }}%</span>
                             </div>
                             <div class="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
-                                <div class="bg-blue-500 h-full" style="width: {{app.skill_score}}%"></div>
+                                <div class="{{ color }} h-full transition-all duration-1000" style="width: {{ score }}%"></div>
                             </div>
                         </div>
-                        <div class="space-y-1">
-                            <div class="flex justify-between text-[10px] font-bold uppercase">
-                                <span class="text-slate-500">Semantic Score</span>
-                                <span class="text-slate-800">{{app.semantic_score}}%</span>
+                        {% endfor %}
+                        <div class="space-y-2">
+                            <div class="flex justify-between text-[10px] font-black uppercase tracking-widest">
+                                <span class="text-slate-500">Skill Alignment</span>
+                                <span class="text-slate-900">{{ app.skill_score }}%</span>
                             </div>
                             <div class="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
-                                <div class="bg-indigo-500 h-full" style="width: {{app.semantic_score}}%"></div>
-                            </div>
-                        </div>
-                        <div class="space-y-1">
-                            <div class="flex justify-between text-[10px] font-bold uppercase">
-                                <span class="text-slate-500">Entity Score</span>
-                                <span class="text-slate-800">{{app.entity_score}}%</span>
-                            </div>
-                            <div class="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
-                                <div class="bg-purple-500 h-full" style="width: {{app.entity_score}}%"></div>
-                            </div>
-                        </div>
-                        <div class="space-y-1">
-                            <div class="flex justify-between text-[10px] font-bold uppercase">
-                                <span class="text-slate-500">ATS Formatting</span>
-                                <span class="text-slate-800">{{app.ats_score}}%</span>
-                            </div>
-                            <div class="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
-                                <div class="bg-emerald-500 h-full" style="width: {{app.ats_score}}%"></div>
+                                <div class="bg-blue-600 h-full" style="width: {{ app.skill_score }}%"></div>
                             </div>
                         </div>
                     </div>
@@ -95,250 +79,211 @@
 
             <div class="lg:col-span-8 space-y-6">
                 
-                <div class="bg-white rounded-3xl shadow-sm p-8 border border-slate-200">
-                    <h3 class="text-lg font-black text-slate-800 tracking-tight flex items-center mb-8">
+                <div class="bg-white rounded-[2.5rem] shadow-sm p-10 border border-slate-200">
+                    <h3 class="text-xl font-black text-slate-800 tracking-tight flex items-center mb-10">
                         <i class="fa-solid fa-wand-magic-sparkles text-blue-600 mr-3"></i>
                         Competency Analysis
                     </h3>
                     
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        <div class="space-y-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
+                        <div class="space-y-6">
                             <p class="text-[10px] font-black uppercase text-emerald-600 tracking-widest flex items-center">
-                                <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full mr-2"></span> Matched Skills
+                                <span class="w-2 h-2 bg-emerald-500 rounded-full mr-2"></span> Matched Strengths
                             </p>
                             <div class="flex flex-wrap gap-2">
                                 {% for skill in matched %}
-                                <span class="px-4 py-2 bg-emerald-50 text-emerald-700 border border-emerald-100 rounded-xl text-xs font-bold">{{skill}}</span>
+                                <span class="px-4 py-2 bg-emerald-50 text-emerald-700 border border-emerald-100 rounded-xl text-[11px] font-bold">{{skill}}</span>
                                 {% empty %}
-                                <span class="text-xs text-slate-400 italic">No skills matched.</span>
+                                <span class="text-xs text-slate-400 italic">No direct matches.</span>
                                 {% endfor %}
                             </div>
                         </div>
 
-                        <div class="space-y-4">
+                        <div class="space-y-6">
                             <p class="text-[10px] font-black uppercase text-rose-500 tracking-widest flex items-center">
-                                <span class="w-1.5 h-1.5 bg-rose-500 rounded-full mr-2"></span> Missing Gaps
+                                <span class="w-2 h-2 bg-rose-500 rounded-full mr-2"></span> Potential Gaps
                             </p>
                             <div class="flex flex-wrap gap-2">
                                 {% for skill in unmatched %}
-                                <span class="px-4 py-2 bg-rose-50 text-rose-600 border border-rose-100 rounded-xl text-xs font-bold italic">{{skill}}</span>
+                                <span class="px-4 py-2 bg-rose-50 text-rose-600 border border-rose-100 rounded-xl text-[11px] font-bold italic">{{skill}}</span>
                                 {% empty %}
-                                <span class="text-xs text-emerald-600 italic">No skill gaps found.</span>
+                                <span class="text-xs text-emerald-600 italic">Skillset fully aligned.</span>
                                 {% endfor %}
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="bg-white rounded-3xl shadow-sm p-8 border border-slate-200">
-                    <h3 class="text-xs font-black text-slate-400 uppercase tracking-widest mb-4">Background Summary</h3>
-                    <p class="text-slate-600 leading-relaxed text-sm mb-8 font-medium italic">
-                        "{{candidate.discription|default:'No professional summary provided by the candidate.'}}"
-                    </p>
-                    
-                    <div class="grid grid-cols-2 gap-4">
-                        <div class="p-6 bg-slate-50 rounded-2xl border border-slate-100">
-                            <p class="text-[10px] text-slate-400 uppercase font-black mb-1">Total Experience</p>
-                            <p class="text-xl font-black text-slate-800">{{exp.title|default:"Not Listed"}}</p>
-                        </div>
-                        <div class="p-6 bg-slate-50 rounded-2xl border border-slate-100">
-                            <p class="text-[10px] text-slate-400 uppercase font-black mb-1">Highest Education</p>
-                            <p class="text-xl font-black text-slate-800">{{edu.course|default:"Not Listed"}}</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="flex flex-col md:flex-row items-center justify-between gap-4 pt-4">
-                    <a href="{{candidate.resume.resume.url}}" class="w-full md:w-auto px-8 py-4 border-2 border-slate-200 text-slate-600 font-black rounded-2xl hover:bg-slate-100 transition text-xs uppercase tracking-widest text-center">
-                        <i class="fa-solid fa-file-pdf mr-2"></i> Preview CV
+                <div class="flex flex-col md:flex-row items-center justify-between gap-6 pt-6 px-4">
+                    <a href="{{candidate.resume.resume.url}}" target="_blank" class="w-full md:w-auto px-10 py-4 bg-white border border-slate-200 text-slate-700 font-black rounded-[1.5rem] hover:bg-slate-50 transition text-xs uppercase tracking-widest text-center shadow-sm">
+                        <i class="fa-solid fa-file-pdf mr-2"></i> Preview Document
                     </a>
+                    
                     <div class="flex w-full md:w-auto gap-3">
-                        <form method="POST" action="#">
-                            {% csrf_token %}
-                            <input type="hidden" name="status" value="REJECTED">
-                            <button class="px-10 py-4 bg-white border-2 border-rose-100 text-rose-500 font-black rounded-2xl hover:bg-rose-50 transition text-xs uppercase tracking-widest">
-                                Reject
-                            </button>
-                        </form>
-                        <form method="POST" action="#">
-                            {% csrf_token %}
-                            <input type="hidden" name="status" value="SHORTLISTED">
-                            <button class="px-10 py-4 bg-slate-900 text-white font-black rounded-2xl hover:bg-blue-600 transition shadow-xl shadow-slate-200 text-xs uppercase tracking-widest">
-                                Shortlist
-                            </button>
-                        </form>
+                        {% if app.status == 'PENDING' %}
+                            <a href="{% url 'recruiter:Reject' app.id %}" class="flex-1 md:flex-none px-10 py-4 bg-white border border-rose-100 text-rose-500 font-black rounded-[1.5rem] hover:bg-rose-50 transition text-xs uppercase tracking-widest text-center">Reject</a>
+                            <a href="{% url 'recruiter:shortlist' app.id %}" class="flex-1 md:flex-none px-10 py-4 bg-slate-900 text-white font-black rounded-[1.5rem] hover:bg-blue-600 transition shadow-xl text-xs uppercase tracking-widest text-center">Shortlist</a>
+                        {% else %}
+                            <div class="px-10 py-4 bg-slate-100 text-slate-400 font-black rounded-[1.5rem] text-xs uppercase tracking-widest border border-slate-200">
+                                Application {{ app.status }}
+                            </div>
+                        {% endif %}
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    <button id="chat-toggle" class="fixed bottom-6 right-6 w-16 h-16 bg-blue-600 text-white rounded-full shadow-2xl hover:bg-blue-700 transition-all transform hover:scale-110 flex items-center justify-center z-50">
-        <i class="fa-solid fa-robot text-2xl"></i>
-        <span class="absolute -top-1 -right-1 flex h-4 w-4">
-            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-            <span class="relative inline-flex rounded-full h-4 w-4 bg-green-500 border-2 border-white"></span>
-        </span>
-    </button>
 
-<div id="chat-window" class="fixed bottom-28 right-8 w-[400px] h-[550px] bg-white rounded-[2rem] shadow-[0_20px_50px_rgba(0,0,0,0.15)] border border-slate-200 flex flex-col z-50 hidden overflow-hidden transition-all duration-300">
-    <div class="p-6 bg-slate-900 text-white flex items-center justify-between">
-        <div class="flex items-center space-x-4">
-            <div class="w-10 h-10 bg-blue-500 rounded-xl flex items-center justify-center shadow-inner">
-                <i class="fa-solid fa-robot"></i>
-            </div>
-            <div>
-                <h4 class="font-black text-sm uppercase tracking-widest">RecruitAI</h4>
-                <p class="text-[10px] text-slate-400 flex items-center">
-                    <span class="w-1.5 h-1.5 bg-emerald-400 rounded-full mr-2"></span> High Accuracy
-                </p>
-            </div>
-        </div>
-        <button id="close-chat" class="hover:bg-slate-800 p-2 rounded-xl transition text-slate-400">
-            <i class="fa-solid fa-chevron-down"></i>
+    {% if recruter.plan.ai_chat %}
+        <button id="chat-toggle" class="fixed bottom-8 right-8 w-16 h-16 bg-blue-600 text-white rounded-full shadow-[0_10px_30px_rgba(37,99,235,0.4)] hover:bg-blue-700 transition-all transform hover:scale-110 flex items-center justify-center z-50">
+            <i class="fa-solid fa-robot text-2xl"></i>
+            <span class="absolute -top-1 -right-1 flex h-4 w-4">
+                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                <span class="relative inline-flex rounded-full h-4 w-4 bg-green-500 border-2 border-white"></span>
+            </span>
         </button>
-    </div>
 
-    <div class="flex-1 overflow-y-auto p-6 space-y-6 bg-slate-50/50" id="chat-messages">
-        <div class="flex items-start space-x-3">
-            <div class="w-8 h-8 bg-white border border-slate-200 rounded-lg flex-shrink-0 flex items-center justify-center text-[10px] font-black text-slate-400 shadow-sm">AI</div>
-            <div class="bg-white border border-slate-200 p-4 rounded-2xl rounded-tl-none text-xs font-medium text-slate-700 shadow-sm max-w-[85%] leading-relaxed">
-                I've processed **{{ candidate.user.first_name }}'s**{{candidate.id}} application{{app.id}}. He appears to have a **{{ app.final_score|floatformat:0 }}%** match. What specifically would you like to verify?
+        <div id="chat-window" class="fixed bottom-28 right-8 w-[420px] h-[580px] bg-white rounded-[2.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.15)] border border-slate-200 flex flex-col z-50 hidden overflow-hidden transition-all duration-300">
+            <div class="p-6 bg-slate-900 text-white flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <div class="w-10 h-10 bg-blue-500 rounded-xl flex items-center justify-center shadow-inner">
+                        <i class="fa-solid fa-robot"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-black text-xs uppercase tracking-widest">RecruitAI <span class="text-blue-400 ml-1">Pro</span></h4>
+                        <p class="text-[10px] text-slate-400 flex items-center">
+                            <span class="w-1.5 h-1.5 bg-emerald-400 rounded-full mr-2"></span> Real-time Analysis
+                        </p>
+                    </div>
+                </div>
+                <button id="close-chat" class="hover:bg-white/10 p-2 rounded-xl transition text-slate-400">
+                    <i class="fa-solid fa-chevron-down"></i>
+                </button>
+            </div>
+
+            <div class="flex-1 overflow-y-auto p-6 space-y-6 bg-slate-50/50" id="chat-messages">
+                <div class="flex items-start space-x-3">
+                    <div class="w-8 h-8 bg-white border border-slate-200 rounded-lg flex-shrink-0 flex items-center justify-center text-[10px] font-black text-slate-400 shadow-sm">AI</div>
+                    <div class="bg-white border border-slate-200 p-4 rounded-2xl rounded-tl-none text-xs font-medium text-slate-700 shadow-sm max-w-[85%] leading-relaxed">
+                        I've analyzed **{{ candidate.user.first_name }}'s** dossier. I found a **{{ app.final_score|floatformat:0 }}%** match for your requirements. Ask me anything about their experience.
+                    </div>
+                </div>
+            </div>
+
+            <div class="p-6 bg-white border-t border-slate-100">
+                <form class="flex items-center space-x-3" id="chat-form">
+                    <input type="hidden" id="target-user-id" value="{{ app.id }}">
+                    <input type="text" id="chat-input" placeholder="Verify skill density..." class="flex-1 bg-slate-50 border-none focus:ring-2 focus:ring-blue-500 rounded-2xl px-5 py-3.5 text-xs font-bold outline-none">
+                    <button type="submit" class="bg-slate-900 text-white w-12 h-12 rounded-2xl hover:bg-blue-600 transition shadow-lg flex items-center justify-center">
+                        <i class="fa-solid fa-paper-plane text-xs"></i>
+                    </button>
+                </form>
             </div>
         </div>
-    </div>
-
-    <div class="p-6 bg-white border-t border-slate-100">
-        <form class="flex items-center space-x-3" id="chat-form">
-            <input type="hidden" id="target-user-id" value="{{ app.id }}">
-            <input type="text" id="chat-input" placeholder="Analyze candidate data..." class="flex-1 bg-slate-100 border-none focus:ring-2 focus:ring-blue-500 rounded-2xl px-5 py-3 text-xs font-bold outline-none placeholder:text-slate-400">
-            <button type="submit" class="bg-slate-900 text-white p-3.5 rounded-2xl hover:bg-blue-600 transition shadow-lg shadow-slate-200">
-                <i class="fa-solid fa-paper-plane"></i>
+    {% else %}
+        <div class="fixed bottom-8 right-8 flex flex-col items-end gap-3 z-50">
+            <div id="upgrade-promo" class="hidden bg-slate-900 text-white p-6 rounded-[2rem] shadow-[0_20px_50px_rgba(0,0,0,0.3)] border border-slate-700 max-w-[260px] animate-in slide-in-from-bottom-5">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+                        <i class="fa-solid fa-bolt text-xs"></i>
+                    </div>
+                    <p class="text-[10px] font-black uppercase tracking-widest text-blue-400">Premium Tool</p>
+                </div>
+                <p class="text-xs font-bold leading-relaxed mb-6">Unlock RecruitAI to chat with applications and identify hidden talent gaps.</p>
+                <a href="{% url 'recruiter:subscription' %}" class="block text-center bg-blue-600 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-blue-500 transition shadow-lg shadow-blue-900/50">
+                    Upgrade to Premium
+                </a>
+            </div>
+            <button onclick="document.getElementById('upgrade-promo').classList.toggle('hidden')" class="w-16 h-16 bg-white text-slate-300 rounded-full shadow-xl flex items-center justify-center border border-slate-200 hover:text-blue-600 hover:border-blue-200 transition-all group">
+                <i class="fa-solid fa-robot text-2xl group-hover:scale-110"></i>
+                <i class="fa-solid fa-lock absolute text-[10px] bottom-4 right-4 bg-white p-1 rounded-full text-slate-400 shadow-sm"></i>
             </button>
-        </form>
-    </div>
+        </div>
+    {% endif %}
 </div>
 
 <script>
-// Selectors
-const chatForm = document.getElementById('chat-form');
-const chatInput = document.getElementById('chat-input');
-const chatMessages = document.getElementById('chat-messages');
-const chatWindow = document.getElementById('chat-window');
-const chatToggle = document.getElementById('chat-toggle');
-const closeChat = document.getElementById('close-chat');
-const targetUserId = document.getElementById('target-user-id').value;
+    // 1. Toggle Chat Visibility (Only runs if user has permission)
+    {% if recruter.plan.ai_chat %}
+        const chatToggle = document.getElementById('chat-toggle');
+        const chatWindow = document.getElementById('chat-window');
+        const closeChat = document.getElementById('close-chat');
 
-// 1. Toggle Chat Window
-chatToggle.addEventListener('click', () => {
-    chatWindow.classList.toggle('hidden');
-    // Ensure scroll is at bottom when opened
-    chatMessages.scrollTop = chatMessages.scrollHeight;
-});
+        chatToggle.addEventListener('click', () => {
+            chatWindow.classList.toggle('hidden');
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        });
 
-closeChat.addEventListener('click', () => {
-    chatWindow.classList.add('hidden');
-});
+        closeChat.addEventListener('click', () => {
+            chatWindow.classList.add('hidden');
+        });
 
-// 2. Submit Logic
-chatForm.addEventListener('submit', function(e) {
-    e.preventDefault();
-    const userMessage = chatInput.value.trim();
+        // 2. Chat Logic
+        const chatForm = document.getElementById('chat-form');
+        const chatInput = document.getElementById('chat-input');
+        const chatMessages = document.getElementById('chat-messages');
+        const targetUserId = document.getElementById('target-user-id').value;
 
-    if (!userMessage) return;
+        chatForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const msg = chatInput.value.trim();
+            if (!msg) return;
 
-    // Show User Message UI
-    appendMessage(userMessage, 'user');
-    chatInput.value = '';
+            appendMessage(msg, 'user');
+            chatInput.value = '';
+            const tId = showTypingIndicator();
 
-    // Show AI Typing Indicator
-    const typingId = showTypingIndicator();
+            fetch("{% url 'recruiter:chatbot_ask' %}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify({ 'message': msg, 'user_id': targetUserId })
+            })
+            .then(res => res.json())
+            .then(data => {
+                removeTypingIndicator(tId);
+                appendMessage(data.reply, 'ai');
+            })
+            .catch(err => {
+                removeTypingIndicator(tId);
+                appendMessage("Analysis interrupted. Please check connection.", 'ai');
+            });
+        });
 
-    // Fetch API
-    fetch("{% url 'recruiter:chatbot_ask' %}", {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': getCookie('csrftoken')
-        },
-        body: JSON.stringify({ 
-            'message': userMessage,
-            'user_id': targetUserId // Ensure this key matches your view logic
-        })
-    })
-    .then(response => {
-        if (!response.ok) throw new Error('Network response was not ok');
-        return response.json();
-    })
-    .then(data => {
-        removeTypingIndicator(typingId);
-        appendMessage(data.reply, 'ai');
-    })
-    .catch(error => {
-        removeTypingIndicator(typingId);
-        appendMessage("I'm sorry, I'm having trouble connecting to the server. Please try again.", 'ai');
-        console.error('Error:', error);
-    });
-});
-
-// 3. UI Helper Functions
-function appendMessage(text, sender) {
-    const div = document.createElement('div');
-    // Convert newlines (\n) from AI into HTML line breaks (<br>)
-    const formattedText = text.replace(/\n/g, '<br>');
-
-    if (sender === 'user') {
-        div.className = "flex items-start space-x-2 justify-end";
-        div.innerHTML = `
-            <div class="bg-blue-600 p-4 rounded-2xl rounded-tr-none text-xs font-bold text-white shadow-md max-w-[85%]">
-                ${formattedText}
-            </div>`;
-    } else {
-        div.className = "flex items-start space-x-3";
-        div.innerHTML = `
-            <div class="w-8 h-8 bg-white border border-slate-200 rounded-lg flex-shrink-0 flex items-center justify-center text-[10px] font-black text-slate-400">AI</div>
-            <div class="bg-white border border-slate-200 p-4 rounded-2xl rounded-tl-none text-xs font-medium text-slate-700 shadow-sm max-w-[85%] leading-relaxed">
-                ${formattedText}
-            </div>`;
-    }
-    chatMessages.appendChild(div);
-    chatMessages.scrollTop = chatMessages.scrollHeight;
-}
-
-function showTypingIndicator() {
-    const id = 'typing-' + Date.now();
-    const div = document.createElement('div');
-    div.id = id;
-    div.className = "flex items-start space-x-3";
-    div.innerHTML = `
-        <div class="w-8 h-8 bg-white border border-slate-200 rounded-lg flex-shrink-0 flex items-center justify-center text-[10px] font-black text-slate-400 shadow-sm">AI</div>
-        <div class="bg-white border border-slate-200 p-4 rounded-2xl rounded-tl-none flex space-x-1 shadow-sm">
-            <span class="w-1.5 h-1.5 bg-slate-300 rounded-full animate-bounce"></span>
-            <span class="w-1.5 h-1.5 bg-slate-300 rounded-full animate-bounce [animation-delay:0.2s]"></span>
-            <span class="w-1.5 h-1.5 bg-slate-300 rounded-full animate-bounce [animation-delay:0.4s]"></span>
-        </div>`;
-    chatMessages.appendChild(div);
-    chatMessages.scrollTop = chatMessages.scrollHeight;
-    return id;
-}
-
-function removeTypingIndicator(id) {
-    const el = document.getElementById(id);
-    if (el) el.remove();
-}
-
-function getCookie(name) {
-    let cookieValue = null;
-    if (document.cookie && document.cookie !== '') {
-        const cookies = document.cookie.split(';');
-        for (let i = 0; i < cookies.length; i++) {
-            const cookie = cookies[i].trim();
-            if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                break;
-            }
+        function appendMessage(text, sender) {
+            const div = document.createElement('div');
+            const fmtText = text.replace(/\n/g, '<br>');
+            div.className = sender === 'user' ? "flex items-start justify-end" : "flex items-start space-x-3";
+            div.innerHTML = sender === 'user' 
+                ? `<div class="bg-blue-600 p-4 rounded-2xl rounded-tr-none text-xs font-bold text-white shadow-md max-w-[85%]">${fmtText}</div>`
+                : `<div class="w-8 h-8 bg-white border border-slate-200 rounded-lg flex-shrink-0 flex items-center justify-center text-[10px] font-black text-slate-400">AI</div>
+                   <div class="bg-white border border-slate-200 p-4 rounded-2xl rounded-tl-none text-xs font-medium text-slate-700 shadow-sm max-w-[85%] leading-relaxed">${fmtText}</div>`;
+            chatMessages.appendChild(div);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
         }
-    }
-    return cookieValue;
-}
+
+        function showTypingIndicator() {
+            const id = 'typing-' + Date.now();
+            const div = document.createElement('div');
+            div.id = id;
+            div.className = "flex items-start space-x-3";
+            div.innerHTML = `<div class="w-8 h-8 bg-white border border-slate-200 rounded-lg flex-shrink-0 flex items-center justify-center text-[10px] font-black text-slate-400">AI</div>
+                             <div class="bg-white border border-slate-200 p-4 rounded-2xl rounded-tl-none flex space-x-1 shadow-sm">
+                                <span class="w-1.5 h-1.5 bg-slate-300 rounded-full animate-bounce"></span>
+                                <span class="w-1.5 h-1.5 bg-slate-300 rounded-full animate-bounce [animation-delay:0.2s]"></span>
+                                <span class="w-1.5 h-1.5 bg-slate-300 rounded-full animate-bounce [animation-delay:0.4s]"></span>
+                             </div>`;
+            chatMessages.appendChild(div);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            return id;
+        }
+
+        function removeTypingIndicator(id) {
+            const el = document.getElementById(id);
+            if (el) el.remove();
+        }
+    {% endif %}
 </script>
 {% endblock %}

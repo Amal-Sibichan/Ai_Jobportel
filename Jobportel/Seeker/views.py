@@ -284,3 +284,5 @@ def job_detials(request,jobid):
         'has_applied':has_applied
     }
     return render(request, 'seeker/jobdetails.html', context)
+
+
