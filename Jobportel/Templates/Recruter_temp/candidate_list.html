@@ -2,108 +2,147 @@
 {% load widget_tweaks %}
 
 {% block content %}
-<div class="min-h-screen bg-slate-50 py-12 px-4">
+<div class="min-h-screen bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-slate-100 via-slate-50 to-white py-12 px-4">
     <div class="max-w-5xl mx-auto">
         
-        <div class="mb-10 flex flex-col md:flex-row justify-between items-end gap-6">
+        <div class="mb-12 flex flex-col md:flex-row justify-between items-center gap-6 text-center md:text-left">
             <div>
-                <h1 class="text-3xl font-bold text-slate-800 tracking-tight">Candidate Pipeline</h1>
-                <p class="text-slate-500 mt-1 italic">Analyzing fitness for: <span class="text-blue-600 font-bold">{{ job.title }}</span></p>
+                <span class="inline-block px-4 py-1.5 mb-4 rounded-full bg-blue-50 text-blue-600 text-[10px] font-black uppercase tracking-[0.2em] border border-blue-100 shadow-sm">
+                    Recruiter Console
+                </span>
+                <h1 class="text-4xl font-black text-slate-900 tracking-tighter">Candidate Pipeline</h1>
+                <p class="text-slate-500 mt-2 font-medium">Hiring for <span class="text-blue-600 font-bold underline underline-offset-4 decoration-blue-200">{{ job.title }}</span></p>
             </div>
-            <div class="bg-white px-4 py-2 rounded-2xl border border-slate-200 shadow-sm">
-                <p class="text-[10px] font-black uppercase text-slate-400">Total Applicants</p>
-                <p class="text-xl font-bold text-slate-800 text-center">{{ count.total }}</p>
+            
+            <div class="flex items-center gap-4 bg-white p-4 rounded-[2rem] border border-slate-200 shadow-xl shadow-slate-200/50">
+                <div class="w-12 h-12 bg-slate-900 rounded-2xl flex items-center justify-center text-white shadow-lg">
+                    <i class="fa-solid fa-users-viewfinder"></i>
+                </div>
+                <div class="pr-4">
+                    <p class="text-[10px] font-black uppercase text-slate-400 tracking-widest">Global Reach</p>
+                    <p class="text-2xl font-black text-slate-800">{{ count.total }} <span class="text-xs text-slate-400 font-bold uppercase ml-1">Apps</span></p>
+                </div>
             </div>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
             <div onclick="showCategory('excellent', this)" id="card-excellent" 
-                 class="pipeline-card active bg-white p-8 rounded-3xl border-2 border-transparent shadow-sm cursor-pointer transition-all hover:translate-y-[-4px] group">
-                <div class="flex items-center justify-between mb-2">
-                    <span class="text-4xl font-black text-emerald-500 group-[.active]:scale-110 transition">{{ count.excellent }}</span>
-                    <i class="fa-solid fa-star text-emerald-200"></i>
+                 class="pipeline-card active relative bg-white p-8 rounded-[2.5rem] border-2 border-transparent shadow-sm cursor-pointer transition-all duration-500 hover:-translate-y-2 group overflow-hidden">
+                <div class="absolute -right-4 -top-4 w-20 h-20 bg-emerald-50 rounded-full group-[.active]:scale-150 transition-transform duration-700"></div>
+                <div class="relative z-10">
+                    <div class="flex items-center justify-between mb-6">
+                        <div class="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-2xl flex items-center justify-center group-[.active]:bg-emerald-500 group-[.active]:text-white transition-colors">
+                            <i class="fa-solid fa-bolt-lightning"></i>
+                        </div>
+                        <i class="fa-solid fa-star text-emerald-200"></i>
+                    </div>
+                    <p class="text-4xl font-black text-slate-800 mb-1 tracking-tighter">{{ count.excellent }}</p>
+                    <span class="block text-[11px] font-black uppercase tracking-[0.2em] text-emerald-600">Elite Talent</span>
                 </div>
-                <span class="block text-[11px] font-black uppercase tracking-widest text-emerald-600">Excellent Match</span>
             </div>
 
             <div onclick="showCategory('good', this)" id="card-good"
-                 class="pipeline-card bg-white p-8 rounded-3xl border-2 border-transparent shadow-sm cursor-pointer transition-all hover:translate-y-[-4px] group">
-                <div class="flex items-center justify-between mb-2">
-                    <span class="text-4xl font-black text-amber-500">{{ count.good }}</span>
-                    <i class="fa-solid fa-thumbs-up text-amber-200"></i>
+                 class="pipeline-card bg-white p-8 rounded-[2.5rem] border-2 border-transparent shadow-sm cursor-pointer transition-all duration-500 hover:-translate-y-2 group overflow-hidden">
+                <div class="absolute -right-4 -top-4 w-20 h-20 bg-amber-50 rounded-full group-[.active]:scale-150 transition-transform duration-700"></div>
+                <div class="relative z-10">
+                    <div class="flex items-center justify-between mb-6">
+                        <div class="w-12 h-12 bg-amber-100 text-amber-600 rounded-2xl flex items-center justify-center group-[.active]:bg-amber-500 group-[.active]:text-white transition-colors">
+                            <i class="fa-solid fa-user-check"></i>
+                        </div>
+                        <i class="fa-solid fa-thumbs-up text-amber-200"></i>
+                    </div>
+                    <p class="text-4xl font-black text-slate-800 mb-1 tracking-tighter">{{ count.good }}</p>
+                    <span class="block text-[11px] font-black uppercase tracking-[0.2em] text-amber-600">Qualified</span>
                 </div>
-                <span class="block text-[11px] font-black uppercase tracking-widest text-amber-600">Good Match</span>
             </div>
 
             <div onclick="showCategory('low', this)" id="card-low"
-                 class="pipeline-card bg-white p-8 rounded-3xl border-2 border-transparent shadow-sm cursor-pointer transition-all hover:translate-y-[-4px] group">
-                <div class="flex items-center justify-between mb-2">
-                    <span class="text-4xl font-black text-rose-500">{{ count.low }}</span>
-                    <i class="fa-solid fa-triangle-exclamation text-rose-200"></i>
+                 class="pipeline-card bg-white p-8 rounded-[2.5rem] border-2 border-transparent shadow-sm cursor-pointer transition-all duration-500 hover:-translate-y-2 group overflow-hidden">
+                <div class="absolute -right-4 -top-4 w-20 h-20 bg-rose-50 rounded-full group-[.active]:scale-150 transition-transform duration-700"></div>
+                <div class="relative z-10">
+                    <div class="flex items-center justify-between mb-6">
+                        <div class="w-12 h-12 bg-rose-100 text-rose-600 rounded-2xl flex items-center justify-center group-[.active]:bg-rose-500 group-[.active]:text-white transition-colors">
+                            <i class="fa-solid fa-filter-circle-xmark"></i>
+                        </div>
+                        <i class="fa-solid fa-triangle-exclamation text-rose-200"></i>
+                    </div>
+                    <p class="text-4xl font-black text-slate-800 mb-1 tracking-tighter">{{ count.low }}</p>
+                    <span class="block text-[11px] font-black uppercase tracking-[0.2em] text-rose-600">Needs Review</span>
                 </div>
-                <span class="block text-[11px] font-black uppercase tracking-widest text-rose-600">Low Match</span>
             </div>
         </div>
 
-        <div class="space-y-6">
-            
-            <div id="excellent" class="candidate-section space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                <div class="flex items-center gap-3 mb-6">
-                    <div class="h-1 w-10 bg-emerald-500 rounded-full"></div>
-                    <h3 class="text-xs font-black text-slate-800 uppercase tracking-widest">Elite Talent (> 70%)</h3>
+        <div class="space-y-12">
+            <div id="excellent" class="candidate-section animate-in fade-in slide-in-from-bottom-6 duration-700">
+                <div class="flex items-center gap-4 mb-8">
+                    <h3 class="text-lg font-black text-slate-800 tracking-tight">Top-Tier Matches <span class="text-emerald-500 ml-2">Score > 70%</span></h3>
+                    <div class="h-[1px] flex-1 bg-slate-200"></div>
                 </div>
-                {% for x in data %}
-                    {% if x.category == 'excellent' %}
-                        {% include 'recruter_temp/includes/candidate_row.html' with x=x color="emerald" %}
-                    {% endif %}
-                {% endfor %}
+                <div class="space-y-4">
+                    {% for x in data %}
+                        {% if x.category == 'excellent' %}
+                            {% include 'recruter_temp/includes/candidate_row.html' with x=x color="emerald" %}
+                        {% endif %}
+                    {% endfor %}
+                </div>
             </div>
 
-            <div id="good" class="candidate-section hidden space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                <div class="flex items-center gap-3 mb-6">
-                    <div class="h-1 w-10 bg-amber-500 rounded-full"></div>
-                    <h3 class="text-xs font-black text-slate-800 uppercase tracking-widest">Potential Hires (61-70%)</h3>
+            <div id="good" class="candidate-section hidden animate-in fade-in slide-in-from-bottom-6 duration-700">
+                <div class="flex items-center gap-4 mb-8">
+                    <h3 class="text-lg font-black text-slate-800 tracking-tight">Strong Potential <span class="text-amber-500 ml-2">61 - 70%</span></h3>
+                    <div class="h-[1px] flex-1 bg-slate-200"></div>
                 </div>
-                {% for x in data %}
-                    {% if x.category == 'good' %}
-                        {% include 'recruter_temp/includes/candidate_row.html' with x=x color="amber" %}
-                    {% endif %}
-                {% endfor %}
+                <div class="space-y-4">
+                    {% for x in data %}
+                        {% if x.category == 'good' %}
+                            {% include 'recruter_temp/includes/candidate_row.html' with x=x color="amber" %}
+                        {% endif %}
+                    {% endfor %}
+                </div>
             </div>
 
-            <div id="low" class="candidate-section hidden space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                <div class="flex items-center gap-3 mb-6">
-                    <div class="h-1 w-10 bg-rose-500 rounded-full"></div>
-                    <h3 class="text-xs font-black text-slate-800 uppercase tracking-widest">Needs Review (≤ 60%)</h3>
+            <div id="low" class="candidate-section hidden animate-in fade-in slide-in-from-bottom-6 duration-700">
+                <div class="flex items-center gap-4 mb-8">
+                    <h3 class="text-lg font-black text-slate-800 tracking-tight">Lower Affinity <span class="text-rose-500 ml-2">Below 60%</span></h3>
+                    <div class="h-[1px] flex-1 bg-slate-200"></div>
                 </div>
-                {% for x in data %}
-                    {% if x.category == 'low' %}
-                        {% include 'recruter_temp/includes/candidate_row.html' with x=x color="rose" %}
-                    {% endif %}
-                {% endfor %}
+                <div class="space-y-4">
+                    {% for x in data %}
+                        {% if x.category == 'low' %}
+                            {% include 'recruter_temp/includes/candidate_row.html' with x=x color="rose" %}
+                        {% endif %}
+                    {% endfor %}
+                </div>
             </div>
-
         </div>
     </div>
 </div>
 
 <style>
+    /* Catchy Active States */
+    #card-excellent.active { border-color: #10b981; shadow: 0 20px 25px -5px rgba(16, 185, 129, 0.1); }
+    #card-good.active { border-color: #f59e0b; shadow: 0 20px 25px -5px rgba(245, 158, 11, 0.1); }
+    #card-low.active { border-color: #f43f5e; shadow: 0 20px 25px -5px rgba(244, 63, 94, 0.1); }
+    
     .pipeline-card.active {
-        border-color: #3b82f6 !important;
-        background-color: #eff6ff !important;
-        box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.1) !important;
+        background-color: white !important;
+        transform: translateY(-8px);
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.08) !important;
     }
 </style>
 
 <script>
     function showCategory(categoryId, element) {
+        // Handle Card UI
         document.querySelectorAll('.pipeline-card').forEach(card => card.classList.remove('active'));
         element.classList.add('active');
 
+        // Handle Section Visibility
         document.querySelectorAll('.candidate-section').forEach(section => {
             section.classList.add('hidden');
         });
-        document.getElementById(categoryId).classList.remove('hidden');
+        const activeSection = document.getElementById(categoryId);
+        activeSection.classList.remove('hidden');
     }
 </script>
 {% endblock %}

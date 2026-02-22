@@ -91,6 +91,7 @@ class job_form(forms.Form):
     salary = forms.CharField(required=True)
     responsablity = forms.CharField(widget=forms.Textarea, required=False)
     due = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}), required=True)
+    banner = forms.ImageField(required=False)
 
     def clean_salary(self):
         salary=self.cleaned_data.get('salary','')
@@ -129,3 +130,4 @@ class PlanForm(forms.Form):
     def clean(self):
         return super().clean()
 
+# class update_job_form(job_form):

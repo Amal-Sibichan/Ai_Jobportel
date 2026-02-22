@@ -22,6 +22,8 @@ urlpatterns = [
     path('payment_success',views.payment_success,name='payment_success'),
     path('subscription_detials',views.subscription_detials,name='subscription_detials'),
     path('recruter/list/<int:job_id>',views.list,name='list'),
+    path('recruter/update_job/<int:job_id>',views.update_jobs,name='update_job'),
+    path('recruter/shortlist_candidate/<int:app_id>/',views.shortlist_candidate,name='shortlist_candidate'),
 
 
 

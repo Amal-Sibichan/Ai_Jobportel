@@ -51,7 +51,7 @@
 
                 <div class="px-7 py-2">
                     <div class="rounded-[2rem] overflow-hidden aspect-video bg-slate-100 group">
-                        <img src="https://images.unsplash.com/photo-1497215728101-856f4ea42174?auto=format&fit=crop&w=800&q=80" 
+                        <img src= {% if job.banner %}{{ job.banner.url }} {% else %}"https://images.unsplash.com/photo-1497215728101-856f4ea42174?auto=format&fit=crop&w=800&q=80" {% endif %} 
                              class="w-full h-full object-cover group-hover:scale-105 transition duration-700" alt="Workplace">
                     </div>
                 </div>

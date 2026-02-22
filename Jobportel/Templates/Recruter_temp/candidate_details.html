@@ -122,7 +122,7 @@
                     <div class="flex w-full md:w-auto gap-3">
                         {% if app.status == 'PENDING' %}
                             <a href="{% url 'recruiter:Reject' app.id %}" class="flex-1 md:flex-none px-10 py-4 bg-white border border-rose-100 text-rose-500 font-black rounded-[1.5rem] hover:bg-rose-50 transition text-xs uppercase tracking-widest text-center">Reject</a>
-                            <a href="{% url 'recruiter:shortlist' app.id %}" class="flex-1 md:flex-none px-10 py-4 bg-slate-900 text-white font-black rounded-[1.5rem] hover:bg-blue-600 transition shadow-xl text-xs uppercase tracking-widest text-center">Shortlist</a>
+                            <a href="{% url 'recruiter:shortlist_candidate' app.id %}" class="flex-1 md:flex-none px-10 py-4 bg-slate-900 text-white font-black rounded-[1.5rem] hover:bg-blue-600 transition shadow-xl text-xs uppercase tracking-widest text-center">Shortlist</a>
                         {% else %}
                             <div class="px-10 py-4 bg-slate-100 text-slate-400 font-black rounded-[1.5rem] text-xs uppercase tracking-widest border border-slate-200">
                                 Application {{ app.status }}

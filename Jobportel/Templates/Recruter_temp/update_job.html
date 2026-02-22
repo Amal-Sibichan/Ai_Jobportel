@@ -1,0 +1,116 @@
+{% extends 'main/index.html' %}
+{% load widget_tweaks %}
+
+{% block content %}
+<div class="min-h-screen bg-slate-50 py-12 px-4">
+    <div class="max-w-4xl mx-auto">
+        
+        <nav class="flex mb-8 text-[10px] font-black uppercase tracking-widest text-slate-400">
+            <a href="{% url 'recruiter:job_list' %}" class="hover:text-blue-600 transition">Dashboard</a>
+            <span class="mx-3">/</span>
+            <span class="text-slate-800">Edit Listing</span>
+        </nav>
+
+        <form method="POST" enctype="multipart/form-data" class="space-y-8">
+            {% csrf_token %}
+            
+            <div class="bg-white p-8 rounded-[2.5rem] border border-slate-200 shadow-xl shadow-blue-900/5 flex flex-col md:flex-row justify-between items-center gap-6 relative overflow-hidden">
+                <div class="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-blue-600 to-indigo-600"></div>
+                <div class="z-10">
+                    <h1 class="text-3xl font-black text-slate-900 tracking-tight">Update Job Listing</h1>
+                    <p class="text-slate-500 text-sm font-medium mt-1 italic">Last modified: {{ job.updated_at|date:"M d, Y" }}</p>
+                </div>
+                <div class="flex items-center gap-3 z-10">
+                    <a href="{% url 'seeker:job_detials' job.id %}" class="bg-white text-slate-600 px-6 py-3 rounded-2xl font-bold border border-slate-200 hover:bg-slate-50 transition text-sm">
+                        View Live
+                    </a>
+                    <button type="submit" class="bg-slate-900 text-white px-10 py-3 rounded-2xl font-black text-sm uppercase tracking-widest hover:bg-blue-600 transition shadow-xl shadow-slate-200">
+                        Save Changes
+                    </button>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                <div class="lg:col-span-8 space-y-6">
+                    <div class="bg-white p-10 rounded-[2.5rem] border border-slate-200 shadow-sm space-y-8">
+                        
+                        <div class="space-y-3">
+                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1">Job Title</label>
+                            {% render_field form.title class="w-full px-5 py-4 rounded-2xl bg-slate-50 border-2 border-transparent focus:border-blue-500 focus:bg-white focus:ring-0 text-sm font-bold transition-all" %}
+                        </div>
+
+                        <div class="space-y-3">
+                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1">Role Description</label>
+                            {% render_field form.discription class="w-full px-5 py-4 rounded-2xl bg-slate-50 border-2 border-transparent focus:border-blue-500 focus:bg-white focus:ring-0 text-sm leading-relaxed transition-all" rows="6" %}
+                        </div>
+
+                        <div class="space-y-3">
+                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1">Key Responsibilities</label>
+                            {% render_field form.responsablity class="w-full px-5 py-4 rounded-2xl bg-slate-50 border-2 border-transparent focus:border-blue-500 focus:bg-white focus:ring-0 text-sm leading-relaxed transition-all" rows="4" %}
+                        </div>
+                    </div>
+
+                    <div class="p-8 rounded-[2.5rem] border-2 border-dashed border-rose-100 bg-rose-50/30 flex justify-between items-center">
+                        <div>
+                            <h4 class="text-sm font-black text-rose-600 uppercase tracking-widest">Archive Job</h4>
+                            <p class="text-xs text-rose-400 mt-1">This will remove the job from active seeker feeds.</p>
+                        </div>
+                        <button type="button" class="px-6 py-3 bg-white border border-rose-200 text-rose-500 rounded-xl font-bold text-xs hover:bg-rose-500 hover:text-white transition-all">
+                            Archive Listing
+                        </button>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-4 space-y-6">
+                    <div class="bg-white p-8 rounded-[2.5rem] border border-slate-200 shadow-sm space-y-6">
+                        <h3 class="font-black text-slate-900 text-xs uppercase tracking-[0.2em] border-b border-slate-50 pb-4">Hard Requirements</h3>
+                        
+                        <div class="space-y-2">
+                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Experience Level</label>
+                            {% render_field form.experience class="w-full px-4 py-3 rounded-xl bg-slate-50 border-none text-xs font-bold" %}
+                        </div>
+
+                        <div class="space-y-2">
+                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Education Required</label>
+                            {% render_field form.education class="w-full px-4 py-3 rounded-xl bg-slate-50 border-none text-xs font-bold" %}
+                        </div>
+
+                        <div class="space-y-2">
+                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Skill Matrix (CSV)</label>
+                            {% render_field form.skills class="w-full px-4 py-3 rounded-xl bg-slate-50 border-none text-xs font-bold" placeholder="e.g. Python, Django, AWS" %}
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-8 rounded-[2.5rem] border border-slate-200 shadow-sm space-y-6">
+                        <h3 class="font-black text-slate-900 text-xs uppercase tracking-[0.2em] border-b border-slate-50 pb-4">Budget & Timeline</h3>
+                        
+                        <div class="space-y-2">
+                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Offered Salary</label>
+                            {% render_field form.salary class="w-full px-4 py-3 rounded-xl bg-slate-50 border-none text-xs font-bold" %}
+                        </div>
+
+                        <div class="space-y-2">
+                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Expiry Date</label>
+                            {% render_field form.due class="w-full px-4 py-3 rounded-xl bg-slate-50 border-none text-xs font-bold" type="date" %}
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-900 p-8 rounded-[2.5rem] text-white shadow-xl relative overflow-hidden">
+                        <div class="absolute -right-4 -top-4 w-20 h-20 bg-white/5 rounded-full"></div>
+                        <h3 class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 mb-6">Listing Visual</h3>
+                        {% if job.banner %}
+                            <div class="w-full h-32 rounded-2xl overflow-hidden mb-4 border border-white/10">
+                                <img src="{{ job.banner.url }}" class="w-full h-full object-cover opacity-60">
+                            </div>
+                        {% endif %}
+                        <label class="block text-center cursor-pointer bg-white/10 hover:bg-white/20 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition">
+                            <i class="fa-solid fa-cloud-arrow-up mr-2"></i> Update Banner
+                            {% render_field form.banner class="hidden" %}
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

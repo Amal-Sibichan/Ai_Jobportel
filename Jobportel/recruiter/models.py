@@ -100,6 +100,7 @@ class job(models.Model):
     responsablity = models.TextField(null=True,blank=True)
     job_vector = VectorField(dimensions=384,null=True,blank=True)
     due = models.DateField(null=True,blank=True)
+    banner = models.ImageField(upload_to='job_banners',null=True,blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
 

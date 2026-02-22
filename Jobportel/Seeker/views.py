@@ -103,7 +103,7 @@ def profileupdate(request):
             current_seeker.save()
             messages.success(request, '  Profile Updated !')
 
-            return redirect('profile')
+            return redirect('seeker:profile')
     else:
         form = profileupdateform(initial={
             'first_name': request.user.first_name,

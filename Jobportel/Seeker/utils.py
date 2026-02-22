@@ -5,6 +5,8 @@ import re
 from PyPDF2 import PdfReader
 import spacy
 from .LLM import extract_skills_llm
+from django.core.mail import send_mail
+from django.conf import settings
 model = SentenceTransformer('all-MiniLM-L6-v2')
 nlp = spacy.load("en_core_web_sm")
 Text_initial=''
@@ -140,7 +142,29 @@ def  atscore(data):
     return round(ats_score, 2)
 
 
+def send_shortlist_email(candidate_email, candidate_name, job_title, company):
+    subject = "Congratulations! You Have Been Shortlisted"
+    
+    message = f"""
+Dear {candidate_name},
 
+We are pleased to inform you that you have been shortlisted for the position of
+{job_title} at {company}.
+
+Our team will contact you soon with further details.
+
+Best regards,
+{company}
+Recruitment Team
+"""
+
+    send_mail(
+        subject,
+        message,
+        settings.EMAIL_HOST_USER,
+        [candidate_email],
+        fail_silently=False,
+    )
 
     
 

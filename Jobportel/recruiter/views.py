@@ -5,7 +5,7 @@ from django.contrib.auth.models import *
 from django.contrib.auth.decorators import login_required,user_passes_test
 from django.contrib.admin.views.decorators import staff_member_required
 from django.views.decorators.http import require_POST, require_http_methods
-from Seeker.utils import extract,entity_score_spacy,atscore,pool_score,semantic_similarity,jaccard_skill_score,generate_vector
+from Seeker.utils import extract,entity_score_spacy,atscore,pool_score,semantic_similarity,jaccard_skill_score,generate_vector,send_shortlist_email
 from Seeker.LLM import resume_bot
 from .forms import *
 from django.http import HttpResponse,JsonResponse
@@ -25,8 +25,10 @@ def is_recruter(user):
 def recruter_home(request):
     emp_obj=Recruter.objects.get(user=request.user)
     jobs=job.objects.filter(recruter=emp_obj).order_by('-created_at')[:5]
+    job_count=job.objects.filter(recruter=emp_obj).count()
+    application_count=application.objects.filter(job__recruter=emp_obj).count()
     today=datetime.date.today()
-    return render(request,'Recruter_temp/recruter_home.html',{'employer':emp_obj,'jobs':jobs,'today':today})
+    return render(request,'Recruter_temp/recruter_home.html',{'employer':emp_obj,'jobs':jobs,'today':today,'job_count':job_count,'application_count':application_count})
 
 @login_required
 @user_passes_test(is_recruter, login_url='/access-denied/')
@@ -64,7 +66,7 @@ def recruter_update(request):
             if 'logo' in request.FILES:
                 current_recruter.logo = request.FILES['logo']
             current_recruter.save()
-            messages.success(request, 'Login successful!')
+            messages.success(request, 'Profile updated successfully!')
             return redirect('recruiter:recruter_profile')
 
 
@@ -144,6 +146,7 @@ def post_job(request):
             salary = form.cleaned_data['salary']
             responsablity = form.cleaned_data['responsablity']
             due = form.cleaned_data['due']
+            banner = form.cleaned_data['banner']
             skills_list = [s.strip() for s in form.cleaned_data['skills'].split(',')]
             job_text = f"""
                         Job Title: {title}
@@ -164,7 +167,7 @@ def post_job(request):
                         {responsablity}
                         """
             job_vector = generate_vector(job_text)
-            new_job = job.objects.create(title=title, discription=discription, skills=skills_list, education=education, experience=experience, salary=salary, responsablity=responsablity,job_vector=job_vector, due=due, recruter=current_recruter)
+            new_job = job.objects.create(title=title, discription=discription, skills=skills_list, education=education, experience=experience, salary=salary, responsablity=responsablity,job_vector=job_vector, due=due, recruter=current_recruter,banner=banner)
             new_job.save()
             return HttpResponse("Job Posted")
     else:
@@ -172,6 +175,69 @@ def post_job(request):
     
 
     return render(request, 'recruter_temp/Post_job.html', {'form': form})
+
+def update_jobs(request,job_id):
+    current_job=get_object_or_404(job,id=job_id)
+    current_recruter = Recruter.objects.get(user=request.user)
+    skill_string = ",".join(current_job.skills)
+    if request.method == 'POST':
+        form=job_form(request.POST)
+        if form.is_valid():
+            title = form.cleaned_data['title']
+            discription = form.cleaned_data['discription']
+            education = form.cleaned_data['education']
+            experience = form.cleaned_data['experience']
+            salary = form.cleaned_data['salary']
+            responsablity = form.cleaned_data['responsablity']
+            due = form.cleaned_data['due']
+            banner = form.cleaned_data['banner']
+            skills_list = [s.strip() for s in form.cleaned_data['skills'].split(',')]
+            job_text = f"""
+                        Job Title: {title}
+
+                        Job Description:
+                        {discription}
+
+                        Required Skills:
+                        {skills_list}
+
+                        Education:
+                        {education}
+
+                        Experience:
+                        {experience}
+
+                        responsablity:
+                        {responsablity}
+                        """
+            job_vector = generate_vector(job_text)
+            current_job.title=title
+            current_job.discription = discription
+            current_job.skills = skills_list
+            current_job.education = education
+            current_job.experience = experience
+            current_job.salary = salary
+            current_job.responsablity = responsablity
+            current_job.job_vector = job_vector
+            current_job.due = due
+            if 'banner' in request.FILES:
+                current_job.banner = request.FILES['banner']
+            current_job.save()
+            return HttpResponse("Job Posted")
+    else:
+        form = job_form(initial={
+            'title':current_job.title,
+            'discription':current_job.discription,
+            'education':current_job.education,
+            'experience':current_job.experience,
+            'salary':current_job.salary,
+            'responsablity':current_job.responsablity,
+            'due':current_job.due,
+            'skills':skill_string,
+
+        })
+
+    return render(request,'recruter_temp/update_job.html',{'form':form,'job':current_job})
 
 @login_required
 @user_passes_test(is_recruter, login_url='/access-denied/')
@@ -261,6 +327,29 @@ def shorlist(request,app_id):
     app.status = "SHORTLISTED"
     app.save()
     return redirect('recruiter:candidate_details', candidate_id=user_id,job_id=job_id)
+
+@login_required
+def shortlist_candidate(request, app_id):
+    app = application.objects.get(id=app_id)
+
+    
+
+    # Get candidate details
+    candidate = app.seeker.user
+    recruiter = app.job.recruter
+    # Send email
+    send_shortlist_email(
+        candidate_email=candidate.email,
+        candidate_name=candidate.username,
+        job_title=app.job.title,
+        company=recruiter.company_name
+    )
+    # Update status
+    app.status = "SHORTLISTED"
+    app.save()
+
+    messages.success(request, "Candidate shortlisted and email sent.")
+    return redirect("recruiter:job_list")
 
 def  Reject(request,app_id):
     app = application.objects.select_related('job', 'seeker', 'seeker__user').get(id=app_id)
