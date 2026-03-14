@@ -2,7 +2,7 @@ from os import name
 from typing import Required
 from django.forms import ModelForm
 from django import forms
-from Seeker.models import seeker
+from Seeker.models import *
 from django.core.exceptions import ValidationError
 from django.contrib.auth import authenticate
 import re
@@ -23,7 +23,10 @@ class register(forms.Form):
         email=self.cleaned_data.get('email')
         if not re.match("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$", email):
             raise ValidationError("Invalid email format")
+        if User.objects.filter(email=email).exists():
+            raise ValidationError("Email already exists")
         return email
+
     
     def clean(self):
         cleaned_data = super().clean()

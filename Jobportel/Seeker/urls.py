@@ -14,7 +14,10 @@ urlpatterns = [
     path('seeker/add_experience',views.add_experience,name='experience'),
     path('seeker/jobs',views.jobs,name='jobs'),
     path('seeker/job_detials/<int:jobid>/',views.job_detials,name='job_detials'),
-    
+    path('seeker/my_application_status/<int:job_id>/', views.my_application_status, name='my_application_status'),
+    path('bookmark_jobs/<int:job_id>/', views.bookmark_jobs, name='bookmark_jobs'),
+    path('my_saved_jobs', views.my_saved_jobs, name='my_saved_jobs'),
+    path('remove_bookmark/<int:job_id>/', views.remove_bookmark, name='remove_bookmark'),
 
 
     

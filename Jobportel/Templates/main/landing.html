@@ -1,0 +1,925 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WorkFlow — Career Pipeline Platform</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Syne:wght@700;800;900&display=swap" rel="stylesheet">
+
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --sidebar:   #0f172a;
+      --surface:   #1e293b;
+      --surface2:  #334155;
+      --zinc-bg:   #f4f4f5;
+      --zinc-100:  #f4f4f5;
+      --zinc-200:  #e4e4e7;
+      --zinc-300:  #d4d4d8;
+      --blue:      #3b82f6;
+      --blue-lt:   #60a5fa;
+      --blue-dk:   #1d4ed8;
+      --emerald:   #10b981;
+      --amber:     #f59e0b;
+      --rose:      #f43f5e;
+      --slate-400: #94a3b8;
+      --slate-500: #64748b;
+      --slate-800: #1e293b;
+      --slate-900: #0f172a;
+      --white:     #ffffff;
+      --mono: 'JetBrains Mono', monospace;
+      --display: 'Syne', sans-serif;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--zinc-bg);
+      color: var(--slate-800);
+      font-family: var(--mono);
+      overflow-x: hidden;
+    }
+
+    /* ── SCROLLBAR ── */
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
+
+    /* ── MESSAGES ── */
+    .message-item {
+      overflow: hidden;
+      transition: opacity 0.3s ease, transform 0.3s ease, max-height 0.35s ease 0.3s, padding 0.35s ease 0.3s, margin 0.35s ease 0.3s;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      height: 72px;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 3rem;
+      background: rgba(15,23,42,0.97);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      animation: slideDown 0.7s ease forwards;
+    }
+
+    .nav-logo { display: flex; align-items: center; gap: 0.75rem; text-decoration: none; }
+
+    .logo-icon {
+      width: 38px; height: 38px; background: var(--blue); border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      color: white; font-size: 1rem; box-shadow: 0 0 20px rgba(59,130,246,0.35);
+    }
+
+    .logo-text {
+      font-family: var(--display); font-size: 1.25rem; font-weight: 900;
+      color: white; letter-spacing: -0.03em; text-transform: uppercase;
+    }
+    .logo-text span { color: var(--blue-lt); }
+
+    .nav-links { display: flex; align-items: center; gap: 0.25rem; list-style: none; }
+    .nav-links a {
+      font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em;
+      color: var(--slate-400); text-decoration: none; padding: 0.5rem 1rem; border-radius: 8px; transition: all 0.15s;
+    }
+    .nav-links a:hover { color: white; background: rgba(255,255,255,0.06); }
+
+    .nav-actions { display: flex; align-items: center; gap: 0.75rem; }
+
+    .btn-ghost {
+      font-family: var(--mono); font-size: 0.68rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.1em; color: var(--slate-400);
+      text-decoration: none; padding: 0.55rem 1.2rem;
+      border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; transition: all 0.15s;
+    }
+    .btn-ghost:hover { color: white; border-color: rgba(255,255,255,0.25); }
+
+    .btn-primary {
+      font-family: var(--mono); font-size: 0.68rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.1em; color: white;
+      text-decoration: none; padding: 0.55rem 1.4rem; background: var(--blue);
+      border-radius: 10px; border: none; cursor: pointer; transition: all 0.15s;
+      box-shadow: 0 0 16px rgba(59,130,246,0.3);
+    }
+    .btn-primary:hover { background: #2563eb; transform: translateY(-1px); box-shadow: 0 4px 20px rgba(59,130,246,0.4); }
+
+    .live-pill {
+      display: flex; align-items: center; gap: 0.4rem; font-size: 0.62rem; color: var(--emerald);
+      background: rgba(16,185,129,0.08); border: 1px solid rgba(16,185,129,0.2);
+      border-radius: 100px; padding: 0.3rem 0.8rem;
+    }
+    .live-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--emerald); animation: blink 2s infinite; flex-shrink: 0; }
+
+    /* ── HERO ── */
+    .hero {
+      min-height: 100vh; display: grid; grid-template-columns: 1fr 1fr;
+      align-items: center; padding: 7rem 3rem 4rem;
+      position: relative; overflow: hidden; background: var(--sidebar);
+    }
+    .hero::before {
+      content: ''; position: absolute; inset: 0; pointer-events: none;
+      background-image: linear-gradient(rgba(59,130,246,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(59,130,246,0.04) 1px, transparent 1px);
+      background-size: 40px 40px;
+    }
+
+    .orb { position: absolute; border-radius: 50%; filter: blur(100px); pointer-events: none; }
+    .orb-1 { width: 500px; height: 500px; background: rgba(59,130,246,0.18); top: -100px; left: -100px; }
+    .orb-2 { width: 380px; height: 380px; background: rgba(16,185,129,0.12); bottom: -60px; right: 200px; }
+    .orb-3 { width: 260px; height: 260px; background: rgba(99,102,241,0.12); top: 40%; right: 50px; }
+
+    .hero-left { position: relative; z-index: 2; display: flex; flex-direction: column; gap: 2rem; }
+
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 100px; padding: 0.4rem 1rem; font-size: 0.65rem;
+      color: var(--slate-400); width: fit-content;
+      opacity: 0; animation: fadeUp 0.6s 0.2s ease forwards;
+    }
+    .hero-badge b { color: var(--blue-lt); }
+
+    h1 {
+      font-family: var(--display); font-size: clamp(3rem, 5.5vw, 5.5rem);
+      font-weight: 900; line-height: 1.0; letter-spacing: -0.04em; color: white;
+      opacity: 0; animation: fadeUp 0.7s 0.35s ease forwards;
+    }
+    h1 .accent {
+      background: linear-gradient(90deg, var(--blue-lt), #34d399);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+
+    .hero-sub {
+      font-size: 0.78rem; line-height: 2; color: var(--slate-400); max-width: 440px;
+      opacity: 0; animation: fadeUp 0.7s 0.5s ease forwards;
+    }
+    .hero-sub .comment { color: #475569; }
+
+    .hero-ctas {
+      display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;
+      opacity: 0; animation: fadeUp 0.7s 0.65s ease forwards;
+    }
+
+    .cta-main {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      font-family: var(--mono); font-size: 0.72rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.1em; color: white; text-decoration: none;
+      padding: 0.85rem 2rem; background: var(--blue); border-radius: 12px;
+      box-shadow: 0 0 24px rgba(59,130,246,0.4); transition: all 0.15s;
+    }
+    .cta-main:hover { background: #2563eb; transform: translateY(-1px); box-shadow: 0 6px 28px rgba(59,130,246,0.5); }
+
+    .cta-secondary {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      font-family: var(--mono); font-size: 0.72rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.1em; color: var(--slate-400);
+      text-decoration: none; padding: 0.85rem 2rem;
+      border: 1px solid rgba(255,255,255,0.12); border-radius: 12px; transition: all 0.15s;
+    }
+    .cta-secondary:hover { color: white; border-color: rgba(255,255,255,0.25); }
+
+    .hero-note { font-size: 0.62rem; color: #475569; opacity: 0; animation: fadeUp 0.7s 0.8s ease forwards; }
+
+    /* HERO RIGHT */
+    .hero-right { position: relative; z-index: 2; display: flex; justify-content: center; align-items: center; height: 480px; }
+    .pipeline-visual { position: relative; width: 100%; height: 100%; }
+
+    .p-node {
+      position: absolute; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 14px; padding: 1rem 1.25rem; backdrop-filter: blur(8px); transition: all 0.2s; cursor: default;
+    }
+    .p-node:hover { background: rgba(255,255,255,0.07); transform: translateY(-3px); }
+    .p-node-label { font-size: 0.6rem; color: #475569; text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 0.3rem; }
+
+    .float-card {
+      position: absolute; background: white; border-radius: 16px;
+      padding: 1.1rem 1.25rem; box-shadow: 0 20px 60px rgba(0,0,0,0.35); width: 220px;
+    }
+    .float-1 { top: 30px; right: 20px; animation: floatY 4s ease-in-out infinite; }
+    .float-2 { bottom: 40px; left: 10px; animation: floatY 4s 1.8s ease-in-out infinite; }
+
+    .fc-company { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; }
+    .fc-avatar { width: 24px; height: 24px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 0.65rem; font-weight: 900; color: white; flex-shrink: 0; }
+    .fc-name { font-size: 0.65rem; color: var(--slate-500); text-transform: uppercase; letter-spacing: 0.08em; }
+    .fc-role { font-family: var(--display); font-size: 0.95rem; font-weight: 700; color: var(--slate-800); margin-bottom: 0.5rem; }
+    .fc-salary { font-size: 0.72rem; font-weight: 700; color: var(--blue); }
+    .fc-tags { display: flex; gap: 0.3rem; margin-top: 0.5rem; flex-wrap: wrap; }
+    .fc-tag { font-size: 0.58rem; padding: 0.2rem 0.5rem; background: var(--zinc-100); color: var(--slate-500); border-radius: 4px; border: 1px solid var(--zinc-200); text-transform: uppercase; letter-spacing: 0.05em; }
+    .fc-bar { height: 3px; background: var(--zinc-200); border-radius: 2px; margin-top: 0.75rem; overflow: hidden; }
+    .fc-bar-fill { height: 100%; border-radius: 2px; }
+
+    /* ── MARQUEE ── */
+    .marquee-wrap { background: var(--sidebar); border-top: 1px solid rgba(255,255,255,0.05); border-bottom: 1px solid rgba(255,255,255,0.05); padding: 1.1rem 0; overflow: hidden; }
+    .marquee-track { display: flex; gap: 3.5rem; width: max-content; white-space: nowrap; animation: marquee 28s linear infinite; }
+    .marquee-item { font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: #334155; display: flex; align-items: center; gap: 3.5rem; }
+    .marquee-item span { color: #60a5fa; }
+    .m-dot { width: 4px; height: 4px; border-radius: 50%; background: var(--blue); opacity: 0.4; flex-shrink: 0; }
+
+    /* ── STATS ── */
+    .stats-section { padding: 5rem 3rem; background: var(--zinc-bg); }
+
+    .section-eyebrow {
+      font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.2em;
+      color: var(--blue); display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.75rem;
+    }
+    .section-eyebrow::before { content: '//'; color: var(--blue-lt); opacity: 0.5; }
+
+    .section-title { font-family: var(--display); font-size: clamp(2rem, 4vw, 3rem); font-weight: 900; letter-spacing: -0.03em; color: var(--slate-800); margin-bottom: 3rem; }
+
+    .stats-grid {
+      display: grid; grid-template-columns: repeat(4, 1fr);
+      border: 1px solid var(--zinc-200); border-radius: 20px; overflow: hidden;
+      background: white; box-shadow: 0 4px 24px rgba(0,0,0,0.05);
+    }
+    .stat-block { padding: 2.5rem 2rem; border-right: 1px solid var(--zinc-200); position: relative; overflow: hidden; transition: background 0.2s; }
+    .stat-block:last-child { border-right: none; }
+    .stat-block:hover { background: var(--zinc-100); }
+    .stat-block::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 3px; transform: scaleX(0); transform-origin: left; transition: transform 0.35s ease; }
+    .stat-block:hover::after { transform: scaleX(1); }
+    .stat-block:nth-child(1)::after { background: var(--blue); }
+    .stat-block:nth-child(2)::after { background: var(--emerald); }
+    .stat-block:nth-child(3)::after { background: var(--amber); }
+    .stat-block:nth-child(4)::after { background: var(--rose); }
+    .stat-label { font-size: 0.62rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.15em; color: var(--slate-400); margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.3rem; }
+    .stat-label::before { content: '#'; opacity: 0.5; }
+    .stat-num { font-family: var(--display); font-size: 3rem; font-weight: 900; letter-spacing: -0.04em; line-height: 1; color: var(--slate-800); }
+    .stat-delta { font-size: 0.65rem; margin-top: 0.5rem; font-weight: 700; }
+
+    /* ── HOW IT WORKS ── */
+    .how-section { padding: 5rem 3rem; background: var(--sidebar); position: relative; overflow: hidden; }
+    .how-section::before { content: ''; position: absolute; inset: 0; background-image: linear-gradient(rgba(59,130,246,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(59,130,246,0.03) 1px, transparent 1px); background-size: 40px 40px; }
+    .how-section .section-title { color: white; margin-bottom: 1rem; }
+    .how-desc { font-size: 0.75rem; color: var(--slate-400); line-height: 1.9; max-width: 500px; margin-bottom: 3.5rem; }
+
+    .pipeline-steps { display: grid; grid-template-columns: repeat(5, 1fr); gap: 0; position: relative; z-index: 1; }
+    .pipe-step { position: relative; padding: 1.75rem 1.5rem; border: 1px solid rgba(255,255,255,0.07); border-right: none; background: rgba(255,255,255,0.02); transition: background 0.2s; cursor: default; }
+    .pipe-step:last-child { border-right: 1px solid rgba(255,255,255,0.07); }
+    .pipe-step:first-child { border-radius: 14px 0 0 14px; }
+    .pipe-step:last-child { border-radius: 0 14px 14px 0; }
+    .pipe-step:hover { background: rgba(255,255,255,0.05); }
+    .pipe-step-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
+    .pipe-dot { width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0; }
+    .pipe-count { font-size: 0.6rem; color: #334155; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); padding: 0.1rem 0.5rem; border-radius: 100px; }
+    .pipe-name { font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.14em; color: #475569; margin-bottom: 0.4rem; }
+    .pipe-title { font-family: var(--display); font-size: 0.95rem; font-weight: 700; color: white; line-height: 1.2; }
+    .pipe-arrow { position: absolute; right: -6px; top: 50%; width: 10px; height: 10px; border-top: 1px solid rgba(255,255,255,0.12); border-right: 1px solid rgba(255,255,255,0.12); transform: translateY(-50%) rotate(45deg); background: var(--sidebar); z-index: 2; }
+
+    /* ── FEATURES ── */
+    .features-section { padding: 5rem 3rem; background: var(--zinc-bg); }
+    .features-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1px; background: var(--zinc-200); border: 1px solid var(--zinc-200); border-radius: 20px; overflow: hidden; }
+    .feat-card { background: white; padding: 2.5rem 2rem; transition: background 0.2s; position: relative; overflow: hidden; }
+    .feat-card:hover { background: var(--zinc-100); }
+    .feat-icon-wrap { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; margin-bottom: 1.25rem; border: 1px solid transparent; }
+    .feat-name { font-family: var(--display); font-size: 1.05rem; font-weight: 800; color: var(--slate-800); letter-spacing: -0.02em; margin-bottom: 0.5rem; }
+    .feat-desc { font-size: 0.72rem; color: var(--slate-500); line-height: 1.9; }
+    .feat-tag { display: inline-block; margin-top: 1.25rem; font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; padding: 0.25rem 0.7rem; border-radius: 100px; border: 1px solid; }
+
+    /* ── TERMINAL / CTA ── */
+    .terminal-section { padding: 5rem 3rem; background: var(--sidebar); position: relative; overflow: hidden; }
+    .terminal-section::before { content: ''; position: absolute; inset: 0; background-image: linear-gradient(rgba(59,130,246,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(59,130,246,0.03) 1px, transparent 1px); background-size: 40px 40px; }
+    .terminal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: center; position: relative; z-index: 1; }
+    .terminal-box { background: #020617; border: 1px solid rgba(255,255,255,0.07); border-radius: 16px; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.4); }
+    .terminal-bar { display: flex; align-items: center; gap: 0.5rem; padding: 0.85rem 1.25rem; background: rgba(255,255,255,0.03); border-bottom: 1px solid rgba(255,255,255,0.06); }
+    .t-dot { width: 11px; height: 11px; border-radius: 50%; }
+    .terminal-title { font-size: 0.65rem; color: #334155; margin-left: auto; letter-spacing: 0.08em; }
+    .terminal-body { padding: 1.75rem; display: flex; flex-direction: column; gap: 0.55rem; }
+    .t-line { font-size: 0.75rem; line-height: 1.6; }
+    .t-line.animated { opacity: 0; animation: fadeUp 0.4s ease forwards; }
+    .t-line:nth-child(1) { animation-delay: 0.5s; }
+    .t-line:nth-child(2) { animation-delay: 1.1s; }
+    .t-line:nth-child(3) { animation-delay: 1.7s; }
+    .t-line:nth-child(4) { animation-delay: 2.3s; }
+    .t-line:nth-child(5) { animation-delay: 2.9s; }
+    .t-line:nth-child(6) { animation-delay: 3.5s; }
+    .t-line:nth-child(7) { animation-delay: 4.1s; }
+    .t-prompt { color: var(--emerald); }
+    .t-cmd { color: var(--slate-400); }
+    .t-arg { color: var(--amber); }
+    .t-out { color: #475569; padding-left: 1.2rem; }
+    .t-success { color: var(--blue-lt); padding-left: 1.2rem; }
+    .t-cursor { display: inline-block; width: 8px; height: 14px; background: var(--blue-lt); border-radius: 1px; vertical-align: middle; animation: blink 1s infinite; margin-left: 2px; }
+
+    .cta-block { display: flex; flex-direction: column; gap: 2rem; }
+    .cta-heading { font-family: var(--display); font-size: clamp(2rem, 3.5vw, 3rem); font-weight: 900; letter-spacing: -0.04em; color: white; line-height: 1.1; }
+    .cta-heading em { font-style: normal; background: linear-gradient(90deg, var(--blue-lt), #34d399); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .cta-desc { font-size: 0.75rem; color: var(--slate-400); line-height: 2; }
+    .cta-desc .comment { color: #334155; }
+    .cta-btns { display: flex; gap: 0.75rem; flex-wrap: wrap; }
+    .btn-lg-blue { font-family: var(--mono); font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: white; text-decoration: none; padding: 0.9rem 2rem; background: var(--blue); border-radius: 12px; border: none; cursor: pointer; box-shadow: 0 0 24px rgba(59,130,246,0.35); transition: all 0.15s; }
+    .btn-lg-blue:hover { background: #2563eb; transform: translateY(-2px); box-shadow: 0 6px 28px rgba(59,130,246,0.5); }
+    .btn-lg-outline { font-family: var(--mono); font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--slate-400); text-decoration: none; padding: 0.9rem 2rem; border: 1px solid rgba(255,255,255,0.12); border-radius: 12px; cursor: pointer; background: transparent; transition: all 0.15s; }
+    .btn-lg-outline:hover { color: white; border-color: rgba(255,255,255,0.3); }
+
+    /* ── TESTIMONIALS ── */
+    .testimonial-section { padding: 5rem 3rem; background: var(--zinc-bg); }
+    .testimonial-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.5rem; }
+    .t-card { background: white; border: 1px solid var(--zinc-200); border-radius: 18px; padding: 2rem; transition: all 0.2s; position: relative; overflow: hidden; }
+    .t-card:hover { transform: translateY(-3px); box-shadow: 0 12px 40px rgba(0,0,0,0.07); }
+    .t-quote-mark { font-family: var(--display); font-size: 4rem; color: var(--zinc-200); line-height: 0.8; margin-bottom: 1rem; }
+    .t-quote { font-size: 0.78rem; color: var(--slate-500); line-height: 1.9; margin-bottom: 1.5rem; }
+    .t-author { display: flex; align-items: center; gap: 0.75rem; }
+    .t-avatar { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 900; color: white; font-family: var(--display); }
+    .t-name { font-family: var(--display); font-size: 0.85rem; font-weight: 800; color: var(--slate-800); }
+    .t-role { font-size: 0.62rem; color: var(--slate-400); margin-top: 0.1rem; }
+    .t-bar { position: absolute; bottom: 0; left: 0; right: 0; height: 3px; }
+
+    /* ── FOOTER ── */
+    footer { background: var(--sidebar); border-top: 1px solid rgba(255,255,255,0.05); padding: 3rem 3rem 2rem; }
+    .footer-top { display: flex; justify-content: space-between; align-items: flex-start; padding-bottom: 2.5rem; border-bottom: 1px solid rgba(255,255,255,0.05); margin-bottom: 2rem; }
+    .footer-brand { display: flex; flex-direction: column; gap: 0.75rem; }
+    .footer-brand-logo { display: flex; align-items: center; gap: 0.75rem; }
+    .footer-brand-desc { font-size: 0.68rem; color: #334155; line-height: 1.8; max-width: 260px; }
+    .footer-links-grid { display: flex; gap: 5rem; }
+    .footer-col { display: flex; flex-direction: column; gap: 0.75rem; }
+    .footer-col-title { font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.18em; color: #475569; margin-bottom: 0.25rem; }
+    .footer-col a { font-size: 0.7rem; color: #334155; text-decoration: none; transition: color 0.15s; }
+    .footer-col a:hover { color: var(--blue-lt); }
+    .footer-bottom { display: flex; justify-content: space-between; align-items: center; }
+    .footer-copy { font-size: 0.62rem; color: #1e293b; text-transform: uppercase; letter-spacing: 0.2em; }
+    .footer-status { display: flex; align-items: center; gap: 0.4rem; font-size: 0.62rem; color: var(--emerald); }
+
+    /* ── ANIMATIONS ── */
+    @keyframes slideDown { from { transform: translateY(-100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes floatY { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.15} }
+    @keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+
+    .reveal { opacity: 0; transform: translateY(20px); transition: opacity 0.65s ease, transform 0.65s ease; }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 1024px) {
+      nav { padding: 0 1.5rem; }
+      .nav-links { display: none; }
+      .hero { grid-template-columns: 1fr; padding: 7rem 1.5rem 4rem; }
+      .hero-right { display: none; }
+      .stats-grid { grid-template-columns: 1fr 1fr; }
+      .pipeline-steps { grid-template-columns: 1fr 1fr; gap: 1rem; }
+      .pipe-step { border: 1px solid rgba(255,255,255,0.07) !important; border-radius: 12px; }
+      .pipe-arrow { display: none; }
+      .features-grid { grid-template-columns: 1fr; }
+      .terminal-grid { grid-template-columns: 1fr; gap: 2.5rem; }
+      .testimonial-grid { grid-template-columns: 1fr; }
+      .footer-top { flex-direction: column; gap: 2.5rem; }
+      .footer-links-grid { gap: 2.5rem; flex-wrap: wrap; }
+      .how-section, .features-section, .stats-section, .terminal-section, .testimonial-section { padding: 3.5rem 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ══════════════════════════════════════════
+       MESSAGES — fixed below nav, pure CSS styled
+  ══════════════════════════════════════════ -->
+  {% if messages %}
+  <div id="message-container" style="
+      position: fixed;
+      top: 88px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      min-width: 380px;
+      max-width: 540px;
+      width: 90vw;
+  ">
+    {% for message in messages %}
+    <div class="message-item" style="
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        padding: 1rem 1.25rem;
+        background: #0f172a;
+        border-radius: 14px;
+        box-shadow: 0 8px 40px rgba(0,0,0,0.55), 0 0 0 1px rgba(255,255,255,0.07);
+        border-left: 4px solid {% if message.tags == 'success' %}#10b981{% else %}#f43f5e{% endif %};
+        font-family: 'JetBrains Mono', monospace;
+    ">
+      <div style="display:flex; align-items:center; gap:0.75rem; min-width:0;">
+        {% if message.tags == 'success' %}
+          <i class="fa-solid fa-circle-check" style="color:#10b981; font-size:1rem; flex-shrink:0;"></i>
+        {% else %}
+          <i class="fa-solid fa-circle-exclamation" style="color:#f43f5e; font-size:1rem; flex-shrink:0;"></i>
+        {% endif %}
+        <span style="font-size:0.68rem; font-weight:700; text-transform:uppercase; letter-spacing:0.12em; color:white; word-break:break-word;">{{ message }}</span>
+      </div>
+      <button
+        onclick="dismissMessage(this.parentElement)"
+        style="background:none; border:none; cursor:pointer; color:rgba(255,255,255,0.25); font-size:1.4rem; line-height:1; padding:0.2rem 0.5rem; border-radius:6px; transition:all 0.15s; flex-shrink:0;"
+        onmouseover="this.style.color='white'; this.style.background='rgba(255,255,255,0.08)'"
+        onmouseout="this.style.color='rgba(255,255,255,0.25)'; this.style.background='none'">
+        &times;
+      </button>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <!-- ══════════════════════════════════════════
+       NAV
+  ══════════════════════════════════════════ -->
+  <nav>
+    <a href="#" class="nav-logo">
+      <div class="logo-icon"><i class="fa-solid fa-layer-group"></i></div>
+      <span class="logo-text">Work<span>Flow</span></span>
+    </a>
+
+    <ul class="nav-links">
+      <li><a href="{% url 'seeker:jobs' %}">Discover</a></li>
+      <li><a href="{% url 'home' %}">Feeds</a></li>
+      <li><a href="#">Companies</a></li>
+    </ul>
+
+    <div class="nav-actions">
+      <div class="live-pill">
+        <span class="live-dot"></span>
+        12,480 live
+      </div>
+      {% if user.is_authenticated %}
+        <a href="{% url 'accounts:logout' %}" class="btn-ghost">Sign out</a>
+      {% else %}
+        <a href="{% url 'accounts:login' %}" class="btn-ghost">Sign in</a>
+        <a href="{% url 'accounts:register' %}" class="btn-primary">Get started →</a>
+      {% endif %}
+    </div>
+  </nav>
+
+  <!-- ══════════════════════════════════════════
+       HERO
+  ══════════════════════════════════════════ -->
+  <section class="hero">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+
+    <div class="hero-left">
+      <div class="hero-badge">
+        <span class="live-dot"></span>
+        <span>Platform v2.5 · <b>AI match engine</b> now live</span>
+      </div>
+
+      <h1>
+        Build your career<br>
+        like a <span class="accent">workflow.</span>
+      </h1>
+
+      <p class="hero-sub">
+        <span class="comment">// track every opportunity</span><br>
+        <span class="comment">// stage every application</span><br>
+        land the role that fits your exact stack.
+      </p>
+
+      <div class="hero-ctas">
+        <a href="{% url 'seeker:jobs' %}" class="cta-main">
+          <i class="fa-solid fa-compass fa-sm"></i>
+          Browse Jobs
+        </a>
+        {% if not request.user.is_authenticated %}
+        <a href="{% url 'accounts:register' %}" class="cta-secondary">
+          <i class="fa-solid fa-user-plus fa-sm"></i>
+          Join Free
+        </a>
+        {% endif %}
+      </div>
+
+      <p class="hero-note">Free to use · No credit card · 89,000+ placements made</p>
+    </div>
+
+    <div class="hero-right">
+      <div class="pipeline-visual">
+
+        <!-- Floating card 1 -->
+        <div class="float-card float-1">
+          <div class="fc-company">
+            <div class="fc-avatar" style="background:#3b82f6;">V</div>
+            <span class="fc-name">Vercel</span>
+            <span style="margin-left:auto;font-size:0.58rem;background:#dcfce7;color:#16a34a;padding:0.15rem 0.5rem;border-radius:100px;font-weight:700;">NEW</span>
+          </div>
+          <div class="fc-role">DX Engineer</div>
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <span class="fc-salary">$145k / yr</span>
+            <span style="font-size:0.6rem;color:#94a3b8;">Remote · 14d left</span>
+          </div>
+          <div class="fc-tags">
+            <span class="fc-tag">TypeScript</span>
+            <span class="fc-tag">Next.js</span>
+          </div>
+          <div class="fc-bar"><div class="fc-bar-fill" style="width:78%;background:#3b82f6;"></div></div>
+        </div>
+
+        <!-- Floating card 2 -->
+        <div class="float-card float-2">
+          <div class="fc-company">
+            <div class="fc-avatar" style="background:#10b981;">A</div>
+            <span class="fc-name">Anthropic</span>
+          </div>
+          <div class="fc-role">ML Researcher</div>
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <span class="fc-salary" style="color:#10b981;">$220k+</span>
+            <span style="font-size:0.6rem;color:#94a3b8;">SF · Full-time</span>
+          </div>
+          <div class="fc-tags">
+            <span class="fc-tag">Python</span>
+            <span class="fc-tag">PyTorch</span>
+            <span class="fc-tag">JAX</span>
+          </div>
+          <div class="fc-bar"><div class="fc-bar-fill" style="width:92%;background:#10b981;"></div></div>
+        </div>
+
+        <!-- Pipeline mini widget -->
+        <div class="p-node" style="top:50%;left:50%;transform:translate(-50%,-50%);min-width:185px;">
+          <div style="position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,#3b82f6,#34d399);border-radius:14px 14px 0 0;"></div>
+          <p class="p-node-label">Your Pipeline</p>
+          <div style="display:flex;flex-direction:column;gap:0.55rem;margin-top:0.5rem;">
+            <div style="display:flex;align-items:center;gap:0.6rem;font-size:0.65rem;">
+              <div style="width:8px;height:8px;border-radius:2px;background:#64748b;flex-shrink:0;"></div>
+              <span style="color:#475569;">Applied</span>
+              <span style="margin-left:auto;color:#cbd5e1;font-weight:700;">1.8k</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:0.6rem;font-size:0.65rem;">
+              <div style="width:8px;height:8px;border-radius:2px;background:#60a5fa;flex-shrink:0;"></div>
+              <span style="color:#475569;">Screening</span>
+              <span style="margin-left:auto;color:#cbd5e1;font-weight:700;">890</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:0.6rem;font-size:0.65rem;">
+              <div style="width:8px;height:8px;border-radius:2px;background:#f59e0b;flex-shrink:0;"></div>
+              <span style="color:#475569;">Interview</span>
+              <span style="margin-left:auto;color:#cbd5e1;font-weight:700;">340</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:0.6rem;font-size:0.65rem;">
+              <div style="width:8px;height:8px;border-radius:2px;background:#10b981;flex-shrink:0;"></div>
+              <span style="color:#475569;">Offer</span>
+              <span style="margin-left:auto;color:#cbd5e1;font-weight:700;">124</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════
+       MARQUEE
+  ══════════════════════════════════════════ -->
+  <div class="marquee-wrap">
+    <div class="marquee-track">
+      <div class="marquee-item">
+        <span>Google</span><div class="m-dot"></div>
+        Stripe<div class="m-dot"></div>
+        <span>Vercel</span><div class="m-dot"></div>
+        Figma<div class="m-dot"></div>
+        <span>Anthropic</span><div class="m-dot"></div>
+        Notion<div class="m-dot"></div>
+        <span>Linear</span><div class="m-dot"></div>
+        OpenAI<div class="m-dot"></div>
+        <span>Airbnb</span><div class="m-dot"></div>
+        Supabase<div class="m-dot"></div>
+        <span>GitHub</span><div class="m-dot"></div>
+        Railway
+      </div>
+      <div class="marquee-item">
+        <span>Google</span><div class="m-dot"></div>
+        Stripe<div class="m-dot"></div>
+        <span>Vercel</span><div class="m-dot"></div>
+        Figma<div class="m-dot"></div>
+        <span>Anthropic</span><div class="m-dot"></div>
+        Notion<div class="m-dot"></div>
+        <span>Linear</span><div class="m-dot"></div>
+        OpenAI<div class="m-dot"></div>
+        <span>Airbnb</span><div class="m-dot"></div>
+        Supabase<div class="m-dot"></div>
+        <span>GitHub</span><div class="m-dot"></div>
+        Railway
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       STATS
+  ══════════════════════════════════════════ -->
+  <section class="stats-section reveal">
+    <div style="max-width:1140px;margin:0 auto;">
+      <p class="section-eyebrow">By the numbers</p>
+      <h2 class="section-title">The platform that performs.</h2>
+      <div class="stats-grid">
+        <div class="stat-block">
+          <p class="stat-label">Open Roles</p>
+          <p class="stat-num">12.4k</p>
+          <p class="stat-delta" style="color:#10b981;">↑ +840 this week</p>
+        </div>
+        <div class="stat-block">
+          <p class="stat-label">Companies Hiring</p>
+          <p class="stat-num">4.8k</p>
+          <p class="stat-delta" style="color:#60a5fa;">↑ +120 new</p>
+        </div>
+        <div class="stat-block">
+          <p class="stat-label">Avg. Days to Offer</p>
+          <p class="stat-num">18d</p>
+          <p class="stat-delta" style="color:#f59e0b;">↓ 3d faster than avg</p>
+        </div>
+        <div class="stat-block">
+          <p class="stat-label">Total Placements</p>
+          <p class="stat-num">89k</p>
+          <p class="stat-delta" style="color:#f43f5e;">↑ All-time high</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════
+       HOW IT WORKS
+  ══════════════════════════════════════════ -->
+  <section class="how-section reveal">
+    <div style="max-width:1140px;margin:0 auto;position:relative;z-index:1;">
+      <p class="section-eyebrow">How it works</p>
+      <h2 class="section-title" style="color:white;">Your career, as a pipeline.</h2>
+      <p class="how-desc">
+        Every job search is a workflow. We built the tools to make yours systematic,
+        trackable, and dramatically faster — from discovery to signed offer.
+      </p>
+      <div class="pipeline-steps">
+        <div class="pipe-step">
+          <div class="pipe-step-top"><div class="pipe-dot" style="background:#64748b;"></div><span class="pipe-count">12.4k</span></div>
+          <p class="pipe-name">Step 01</p>
+          <p class="pipe-title">Discover</p>
+          <p style="font-size:0.65rem;color:#334155;margin-top:0.5rem;line-height:1.7;">Browse curated roles matched to your profile and stack.</p>
+          <div class="pipe-arrow"></div>
+        </div>
+        <div class="pipe-step">
+          <div class="pipe-step-top"><div class="pipe-dot" style="background:#3b82f6;"></div><span class="pipe-count">1.8k</span></div>
+          <p class="pipe-name">Step 02</p>
+          <p class="pipe-title">Apply</p>
+          <p style="font-size:0.65rem;color:#334155;margin-top:0.5rem;line-height:1.7;">One-click apply with your saved profile. Track every submission.</p>
+          <div class="pipe-arrow"></div>
+        </div>
+        <div class="pipe-step">
+          <div class="pipe-step-top"><div class="pipe-dot" style="background:#60a5fa;"></div><span class="pipe-count">890</span></div>
+          <p class="pipe-name">Step 03</p>
+          <p class="pipe-title">Screen</p>
+          <p style="font-size:0.65rem;color:#334155;margin-top:0.5rem;line-height:1.7;">Recruiters review, shortlist, and message you directly.</p>
+          <div class="pipe-arrow"></div>
+        </div>
+        <div class="pipe-step">
+          <div class="pipe-step-top"><div class="pipe-dot" style="background:#f59e0b;"></div><span class="pipe-count">340</span></div>
+          <p class="pipe-name">Step 04</p>
+          <p class="pipe-title">Interview</p>
+          <p style="font-size:0.65rem;color:#334155;margin-top:0.5rem;line-height:1.7;">Schedule, prep, and track every round from your dashboard.</p>
+          <div class="pipe-arrow"></div>
+        </div>
+        <div class="pipe-step">
+          <div class="pipe-step-top"><div class="pipe-dot" style="background:#10b981;"></div><span class="pipe-count">124</span></div>
+          <p class="pipe-name">Step 05</p>
+          <p class="pipe-title">Offer 🎉</p>
+          <p style="font-size:0.65rem;color:#334155;margin-top:0.5rem;line-height:1.7;">Negotiate with confidence using real salary data. Sign and celebrate.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════
+       FEATURES
+  ══════════════════════════════════════════ -->
+  <section class="features-section reveal">
+    <div style="max-width:1140px;margin:0 auto;">
+      <p class="section-eyebrow">Built different</p>
+      <h2 class="section-title">Every tool you need. Nothing you don't.</h2>
+      <div class="features-grid">
+        <div class="feat-card">
+          <div class="feat-icon-wrap" style="background:rgba(59,130,246,0.08);border-color:rgba(59,130,246,0.2);"><i class="fa-solid fa-table-columns" style="color:#3b82f6;"></i></div>
+          <p class="feat-name">Pipeline Tracking</p>
+          <p class="feat-desc">Every application lives in a Kanban board. Drag it through stages, set deadlines, add notes — total clarity at a glance.</p>
+          <span class="feat-tag" style="color:#3b82f6;border-color:rgba(59,130,246,0.25);background:rgba(59,130,246,0.05);">Core Feature</span>
+        </div>
+        <div class="feat-card">
+          <div class="feat-icon-wrap" style="background:rgba(16,185,129,0.08);border-color:rgba(16,185,129,0.2);"><i class="fa-solid fa-bolt" style="color:#10b981;"></i></div>
+          <p class="feat-name">AI Match Engine</p>
+          <p class="feat-desc">Paste your resume once. The engine scores every role and surfaces the highest-fit matches first — no more endless scrolling.</p>
+          <span class="feat-tag" style="color:#10b981;border-color:rgba(16,185,129,0.25);background:rgba(16,185,129,0.05);">AI Powered</span>
+        </div>
+        <div class="feat-card">
+          <div class="feat-icon-wrap" style="background:rgba(245,158,11,0.08);border-color:rgba(245,158,11,0.2);"><i class="fa-solid fa-chart-line" style="color:#f59e0b;"></i></div>
+          <p class="feat-name">Salary Intelligence</p>
+          <p class="feat-desc">Real compensation data from verified offers. Know your number before you apply. Negotiate with facts, not feelings.</p>
+          <span class="feat-tag" style="color:#f59e0b;border-color:rgba(245,158,11,0.25);background:rgba(245,158,11,0.05);">Live Data</span>
+        </div>
+        <div class="feat-card">
+          <div class="feat-icon-wrap" style="background:rgba(244,63,94,0.08);border-color:rgba(244,63,94,0.2);"><i class="fa-solid fa-bell" style="color:#f43f5e;"></i></div>
+          <p class="feat-name">Deadline Alerts</p>
+          <p class="feat-desc">Never miss a closing date. Smart reminders fire at exactly the right moment to keep your pipeline moving forward.</p>
+          <span class="feat-tag" style="color:#f43f5e;border-color:rgba(244,63,94,0.25);background:rgba(244,63,94,0.05);">Automation</span>
+        </div>
+        <div class="feat-card">
+          <div class="feat-icon-wrap" style="background:rgba(99,102,241,0.08);border-color:rgba(99,102,241,0.2);"><i class="fa-solid fa-puzzle-piece" style="color:#6366f1;"></i></div>
+          <p class="feat-name">Integrations</p>
+          <p class="feat-desc">Connect Notion, Linear, Slack. Import from LinkedIn. Export to Sheets. Your workflow, your tools — we tie them together.</p>
+          <span class="feat-tag" style="color:#6366f1;border-color:rgba(99,102,241,0.25);background:rgba(99,102,241,0.05);">30+ Apps</span>
+        </div>
+        <div class="feat-card">
+          <div class="feat-icon-wrap" style="background:rgba(59,130,246,0.08);border-color:rgba(59,130,246,0.2);"><i class="fa-solid fa-shield-halved" style="color:#3b82f6;"></i></div>
+          <p class="feat-name">Privacy First</p>
+          <p class="feat-desc">Your search stays private. No recruiter spam unless you opt in. You are always in complete control of your data.</p>
+          <span class="feat-tag" style="color:#3b82f6;border-color:rgba(59,130,246,0.25);background:rgba(59,130,246,0.05);">Anonymous Mode</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════
+       TERMINAL CTA
+  ══════════════════════════════════════════ -->
+  <section class="terminal-section reveal">
+    <div style="max-width:1140px;margin:0 auto;">
+      <div class="terminal-grid">
+
+        <div class="terminal-box">
+          <div class="terminal-bar">
+            <span class="t-dot" style="background:#ff5f56;"></span>
+            <span class="t-dot" style="background:#ffbd2e;"></span>
+            <span class="t-dot" style="background:#27c93f;"></span>
+            <span class="terminal-title">workflow — career-pipeline v2.5</span>
+          </div>
+          <div class="terminal-body">
+            <div class="t-line animated"><span class="t-prompt">$ </span><span class="t-cmd">workflow init --profile</span></div>
+            <div class="t-line animated t-out">✓ Profile loaded · Full-stack Engineer</div>
+            <div class="t-line animated"><span class="t-prompt">$ </span><span class="t-cmd">workflow search --match --top 5</span></div>
+            <div class="t-line animated t-out">⟳ Scanning 12,480 live roles...</div>
+            <div class="t-line animated t-success">✓ 47 high-fit matches found (≥ 85% score)</div>
+            <div class="t-line animated"><span class="t-prompt">$ </span><span class="t-cmd">workflow apply </span><span class="t-arg">"Staff Eng @ Vercel"</span></div>
+            <div class="t-line animated t-success">✓ Added to pipeline · Stage: Applied · Due: 14d <span class="t-cursor"></span></div>
+          </div>
+        </div>
+
+        <div class="cta-block">
+          <div>
+            <p class="section-eyebrow">Ready when you are</p>
+            <h2 class="cta-heading">Your next role is<br><em>one step away.</em></h2>
+          </div>
+          <p class="cta-desc">
+            <span class="comment">// join 89,000+ engineers, designers,</span><br>
+            <span class="comment">// and product people who hired smarter.</span><br><br>
+            Stop scrolling job boards. Start running a pipeline.
+          </p>
+          <div class="cta-btns">
+            {% if not request.user.is_authenticated %}
+              <a href="{% url 'accounts:register' %}" class="btn-lg-blue">Get started free →</a>
+              <a href="{% url 'seeker:jobs' %}" class="btn-lg-outline">Browse Jobs</a>
+            {% else %}
+              <a href="{% url 'seeker:jobs' %}" class="btn-lg-blue">Browse Jobs →</a>
+            {% endif %}
+          </div>
+          <p style="font-size:0.62rem;color:#334155;margin-top:-0.5rem;">Free forever · No credit card · Cancel anytime</p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════
+       TESTIMONIALS
+  ══════════════════════════════════════════ -->
+  <section class="testimonial-section reveal">
+    <div style="max-width:1140px;margin:0 auto;">
+      <p class="section-eyebrow">Success stories</p>
+      <h2 class="section-title">People who shipped their career.</h2>
+      <div class="testimonial-grid">
+
+        <div class="t-card">
+          <div class="t-quote-mark">"</div>
+          <p class="t-quote">WorkFlow changed how I approach job searching completely. Having everything in one pipeline view means nothing slips through the cracks. Went from 0 to offer in 3 weeks.</p>
+          <div class="t-author">
+            <div class="t-avatar" style="background:#3b82f6;">AR</div>
+            <div>
+              <p class="t-name">Aisha Rahman</p>
+              <p class="t-role">Senior Engineer @ Stripe</p>
+            </div>
+          </div>
+          <div class="t-bar" style="background:linear-gradient(90deg,#3b82f6,#60a5fa);"></div>
+        </div>
+
+        <div class="t-card">
+          <div class="t-quote-mark">"</div>
+          <p class="t-quote">The salary intelligence feature alone is worth it. I walked into every negotiation knowing exactly what the market rate was. Ended up 28% above my initial target.</p>
+          <div class="t-author">
+            <div class="t-avatar" style="background:#10b981;">MK</div>
+            <div>
+              <p class="t-name">Marcus Kim</p>
+              <p class="t-role">Product Designer @ Figma</p>
+            </div>
+          </div>
+          <div class="t-bar" style="background:linear-gradient(90deg,#10b981,#34d399);"></div>
+        </div>
+
+        <div class="t-card">
+          <div class="t-quote-mark">"</div>
+          <p class="t-quote">I used to lose track of where I was in every process. WorkFlow's pipeline view made my search feel like a system — and systems get results. Hired in 18 days.</p>
+          <div class="t-author">
+            <div class="t-avatar" style="background:#f59e0b;">SL</div>
+            <div>
+              <p class="t-name">Sofia Laurent</p>
+              <p class="t-role">Data Lead @ Notion</p>
+            </div>
+          </div>
+          <div class="t-bar" style="background:linear-gradient(90deg,#f59e0b,#fbbf24);"></div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════
+       FOOTER
+  ══════════════════════════════════════════ -->
+  <footer>
+    <div style="max-width:1140px;margin:0 auto;">
+      <div class="footer-top">
+        <div class="footer-brand">
+          <div class="footer-brand-logo">
+            <div class="logo-icon" style="width:32px;height:32px;font-size:0.8rem;border-radius:8px;"><i class="fa-solid fa-layer-group"></i></div>
+            <span class="logo-text" style="font-size:1rem;">Work<span>Flow</span></span>
+          </div>
+          <p class="footer-brand-desc">High-performance recruitment platform for engineers, designers, and product people who treat their careers like a system.</p>
+        </div>
+        <div class="footer-links-grid">
+          <div class="footer-col">
+            <p class="footer-col-title">Product</p>
+            <a href="{% url 'seeker:jobs' %}">Browse Jobs</a>
+            <a href="#">Companies</a>
+            <a href="#">Salary DB</a>
+          </div>
+          <div class="footer-col">
+            <p class="footer-col-title">Account</p>
+            {% if request.user.is_authenticated %}
+              <a href="{% url 'accounts:logout' %}">Sign out</a>
+            {% else %}
+              <a href="{% url 'accounts:login' %}">Sign in</a>
+              <a href="{% url 'accounts:register' %}">Register</a>
+            {% endif %}
+          </div>
+          <div class="footer-col">
+            <p class="footer-col-title">Legal</p>
+            <a href="#">Privacy</a>
+            <a href="#">Terms</a>
+            <a href="#">Contact</a>
+          </div>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p class="footer-copy">© 2026 WorkFlow Ecosystem · High Performance Recruitment</p>
+        <div class="footer-status"><span class="live-dot"></span>All systems operational</div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // ── DISMISS A SINGLE MESSAGE ──
+    function dismissMessage(element) {
+      if (!element) return;
+      element.style.opacity = '0';
+      element.style.transform = 'translateY(-8px)';
+      // lock current height before collapsing
+      element.style.maxHeight = element.offsetHeight + 'px';
+      setTimeout(() => {
+        element.style.maxHeight = '0';
+        element.style.paddingTop = '0';
+        element.style.paddingBottom = '0';
+        element.style.marginBottom = '0';
+      }, 300);
+      setTimeout(() => element.remove(), 660);
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+
+      // Auto-dismiss messages with stagger
+      document.querySelectorAll('.message-item').forEach((msg, i) => {
+        setTimeout(() => dismissMessage(msg), 4000 + i * 800);
+      });
+
+      // Scroll reveal
+      const observer = new IntersectionObserver(entries => {
+        entries.forEach(e => {
+          if (e.isIntersecting) {
+            e.target.classList.add('visible');
+            observer.unobserve(e.target);
+          }
+        });
+      }, { threshold: 0.1 });
+      document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+      // Highlight active nav link
+      document.querySelectorAll('.nav-links a').forEach(link => {
+        if (link.href === window.location.href) {
+          link.style.color = '#60a5fa';
+          link.style.background = 'rgba(255,255,255,0.06)';
+        }
+      });
+
+    });
+  </script>
+
+</body>
+</html>

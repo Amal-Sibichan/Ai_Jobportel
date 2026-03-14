@@ -91,9 +91,9 @@ class application(models.Model):
             )
         ]
     def save(self, *args, **kwargs):
-        if self.final_score > 70:
+        if self.final_score >= 70:
             self.category = 'excellent'
-        elif self.final_score > 60:
+        elif self.final_score >= 50:
             self.category = 'good'
         else:
             self.category = 'low'
@@ -104,3 +104,14 @@ class application(models.Model):
 
 
 
+class SavedJob(models.Model):
+    seeker = models.ForeignKey(seeker, on_delete=models.CASCADE, related_name='saved_jobs')
+    job = models.ForeignKey(job, on_delete=models.CASCADE, related_name='favorited_by')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        # This prevents a user from saving the same job twice
+        unique_together = ('seeker', 'job') 
+
+    def __str__(self):
+        return f"{self.seeker.user.username} saved {self.job.title}"

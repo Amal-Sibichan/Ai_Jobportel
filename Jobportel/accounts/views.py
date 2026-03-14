@@ -34,7 +34,7 @@ def login_user(request):
 def logout_user(request):
     logout(request)
     messages.info(request, "Logged out successfully")
-    return redirect('accounts:login')
+    return redirect('landing')
 
 def register_user(request):
     if request.method == 'POST':

@@ -13,13 +13,15 @@ from .utils import extract,entity_score_spacy,atscore,pool_score,semantic_simila
 from .LLM import extract_skills_llm
 from recruiter.models import *
 from django.db.models import Q
+from django.utils import timezone
 # Create your views here.
 @login_required
 def seeker_home(request):
     seeker_obj = seeker.objects.get(user=request.user)
     
 
-    jobs = job.objects.select_related('recruter').all()
+    today = timezone.now().date()
+    jobs = job.objects.select_related('recruter').filter(due__gte=today)
     return render(request,'main/home.html',{'seeker':seeker_obj,'jobs':jobs})
 @login_required
 def profile(request):
@@ -244,7 +246,7 @@ from django.shortcuts import render
 from django.db.models import Q
 from .models import job
 
-@login_required
+
 def jobs(request):
     # Start with all jobs
     job_list = job.objects.all().order_by('-created_at')
@@ -274,15 +276,58 @@ def jobs(request):
 
 def job_detials(request,jobid):
     has_applied=False
-    user=seeker.objects.get(user=request.user)
-    job_instance = job.objects.get(id=jobid)
-    if application.objects.filter(seeker=user,job=job_instance).exists():
-        has_applied=True
+    saved = False
     
+    job_instance = job.objects.get(id=jobid)
+    if request.user.is_authenticated:
+        user=seeker.objects.get(user=request.user)
+        if user:
+            if application.objects.filter(seeker=user,job=job_instance).exists():
+                has_applied=True
+            
+            if SavedJob.objects.filter(seeker=user,job=job_instance).exists():
+                saved = True
     context = {
         'job': job_instance,
-        'has_applied':has_applied
+        'has_applied':has_applied,
+        'saved':saved
     }
     return render(request, 'seeker/jobdetails.html', context)
 
+@login_required
+def my_application_status(request,job_id):
+    job_instance = job.objects.get(id=job_id)
+    user = seeker.objects.get(user=request.user)
+    application_instance = application.objects.get(job=job_instance,seeker=user)
+    context = {
+        'application': application_instance,
+    }
+    return render(request, 'seeker/myapplication.html', context)
 
+@login_required
+def bookmark_jobs(request,job_id):
+    user = seeker.objects.get(user=request.user)
+    job_instantce = job.objects.get(id=job_id)
+
+    SavedJob.objects.create(seeker=user,job=job_instantce)
+    messages.success(request, 'Job bookmarked successfully !')
+    return redirect('seeker:job_detials',jobid=job_id)
+
+@login_required
+def my_saved_jobs(request):
+    user = seeker.objects.get(user=request.user)
+    saved_jobs = SavedJob.objects.filter(seeker=user)
+    context = {
+        'saved_jobs': saved_jobs,
+    }
+    return render(request, 'seeker/my_saved_jobs.html', context)
+
+
+@login_required
+def remove_bookmark(request,job_id):
+    user = seeker.objects.get(user=request.user)
+    job_instantce = job.objects.get(id=job_id)
+
+    SavedJob.objects.filter(seeker=user,job=job_instantce).delete()
+    messages.success(request, 'Job removed from bookmark !')
+    return redirect('seeker:my_saved_jobs')

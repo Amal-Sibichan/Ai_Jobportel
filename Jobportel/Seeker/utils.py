@@ -86,23 +86,16 @@ def semantic_similarity(resume_vector, jd_vector):
 
 
 # POOLING............................................................................
-def pool_score(scores,skill,ats,ent,sem):
-        if skill < 0.3 or sem < 0.3 or ats < 0.3 or ent < 0.3:
-            return "Poor"
+def pool_score(final_score):
 
-    # Excellent
-        if scores >= 0.75 and skill >= 0.6 and sem >= 0.6:
-            return "Excellent"
+    if final_score >= 0.75:
+        return "Excellent"
 
-    # Good
-        if scores >= 0.6:
-            return "Good"
+    elif final_score >= 0.50:
+        return "Good"
 
-    # Average
-        if scores >= 0.4:
-             return "Average"
-
-        return "Poor"
+    else:
+        return "low"
 
 # ATS SCORE............................................................................
 def  atscore(data):

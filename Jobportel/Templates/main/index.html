@@ -1,129 +1,320 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <title>{% block title %}WorkFlow{% endblock %}</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Syne:wght@700;800;900&display=swap" rel="stylesheet">
+    
+    <title>{% block title %}WorkFlow Platform{% endblock %}</title>
+    
     <style>
-        .active-link { @apply bg-blue-50 text-blue-600 font-semibold; }
+        :root {
+            --sidebar:   #0f172a;
+            --paper-bg:  #ffffff; 
+            --grid-line: rgba(59, 130, 246, 0.08); 
+            --blue:      #3b82f6;
+            --mono: 'JetBrains Mono', monospace;
+            --display: 'Syne', sans-serif;
+        }
+
+        /* ── GRID PAPER BACKGROUND ── */
+        .app-workspace { 
+            background-color: var(--paper-bg);
+            background-image: 
+                linear-gradient(var(--grid-line) 1.5px, transparent 1.5px),
+                linear-gradient(90deg, var(--grid-line) 1.5px, transparent 1.5px);
+            background-size: 40px 40px;
+            background-attachment: fixed;
+        }
+
+        /* ── FIXED SIDEBAR LOGIC ── */
+        .glass-sidebar { 
+            background: var(--sidebar); 
+            position: fixed; /* Forced Fixed */
+            top: 0; 
+            left: 0; 
+            bottom: 0; 
+            width: 18rem; /* Equivalent to w-72 */
+            overflow-y: auto;
+            z-index: 50;
+        }
+
+        /* Responsive width for fixed sidebar */
+        @media (max-width: 1024px) {
+            .glass-sidebar { width: 5rem; } /* Equivalent to w-20 */
+        }
+
+        /* Padding for the main content to clear the fixed sidebar */
+        .main-wrapper {
+            margin-left: 18rem;
+        }
+        @media (max-width: 1024px) {
+            .main-wrapper { margin-left: 5rem; }
+        }
+
+        /* ── SIDEBAR ANIMATIONS ── */
+        @keyframes sidebarItemIn {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .nav-anchor {
+            opacity: 0;
+            animation: sidebarItemIn 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+            transition: all 0.3s ease;
+        }
+
+        .nav-anchor:nth-child(1) { animation-delay: 0.1s; }
+        .nav-anchor:nth-child(2) { animation-delay: 0.2s; }
+        .nav-anchor:nth-child(3) { animation-delay: 0.3s; }
+        .nav-anchor:nth-child(4) { animation-delay: 0.4s; }
+        .nav-anchor:nth-child(5) { animation-delay: 0.5s; }
+
+        .nav-link-active {
+            background: rgba(59, 130, 246, 0.15);
+            color: #60a5fa;
+            border-right: 4px solid var(--blue);
+            box-shadow: inset -10px 0 20px -10px rgba(59, 130, 246, 0.5);
+        }
+
+        .nav-anchor:hover:not(.nav-link-active) {
+            background: rgba(255, 255, 255, 0.03);
+            transform: translateX(8px);
+            color: white;
+        }
+
+        body { font-family: var(--mono); }
+        h1, h2, h3, .logo-font { font-family: var(--display); }
+
+        /* Transitions */
+        .page-transition { animation: pageIn 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
+        @keyframes pageIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .page-exit { opacity: 0; transform: translateY(-10px); filter: blur(8px); transition: 0.4s; }
+
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 10px; }
     </style>
 </head>
-<body class="bg-slate-50 font-sans text-slate-900 flex">
+<body class="app-workspace text-slate-900 min-h-screen">
+    {% if messages %}
+  <div id="message-container" style="
+      position: fixed;
+      top: 88px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      min-width: 380px;
+      max-width: 540px;
+      width: 90vw;
+  ">
+    {% for message in messages %}
+    <div class="message-item" style="
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        padding: 1rem 1.25rem;
+        background: #0f172a;
+        border-radius: 14px;
+        box-shadow: 0 8px 40px rgba(0,0,0,0.55), 0 0 0 1px rgba(255,255,255,0.07);
+        border-left: 4px solid {% if message.tags == 'success' %}#10b981{% else %}#f43f5e{% endif %};
+        font-family: 'JetBrains Mono', monospace;
+    ">
+      <div style="display:flex; align-items:center; gap:0.75rem; min-width:0;">
+        {% if message.tags == 'success' %}
+          <i class="fa-solid fa-circle-check" style="color:#10b981; font-size:1rem; flex-shrink:0;"></i>
+        {% else %}
+          <i class="fa-solid fa-circle-exclamation" style="color:#f43f5e; font-size:1rem; flex-shrink:0;"></i>
+        {% endif %}
+        <span style="font-size:0.68rem; font-weight:700; text-transform:uppercase; letter-spacing:0.12em; color:white; word-break:break-word;">{{ message }}</span>
+      </div>
+      <button
+        onclick="dismissMessage(this.parentElement)"
+        style="background:none; border:none; cursor:pointer; color:rgba(255,255,255,0.25); font-size:1.4rem; line-height:1; padding:0.2rem 0.5rem; border-radius:6px; transition:all 0.15s; flex-shrink:0;"
+        onmouseover="this.style.color='white'; this.style.background='rgba(255,255,255,0.08)'"
+        onmouseout="this.style.color='rgba(255,255,255,0.25)'; this.style.background='none'">
+        &times;
+      </button>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
 
-    <aside class="w-20 lg:w-64 h-screen sticky top-0 bg-white border-r border-slate-200 flex flex-col p-4 lg:p-6">
-        <div class="mb-10 lg:px-2 flex items-center gap-2">
-            <div class="bg-blue-600 p-1.5 rounded-lg text-white">
-                <i class="fa-solid fa-briefcase text-xl"></i>
-            </div>
-            <h1 class="text-xl font-bold hidden lg:block tracking-tight text-slate-800">WorkFlow</h1>
+    <aside class="glass-sidebar flex flex-col border-r border-white/5 shadow-2xl">
+        <div class="absolute top-0 left-0 w-full h-64 bg-blue-600/10 blur-[80px] pointer-events-none"></div>
+
+        <div class="p-8 mb-4 relative z-10">
+            <a href="/" class="flex items-center gap-3 no-underline group">
+                <div class="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center text-white shadow-[0_0_20px_rgba(59,130,246,0.5)] group-hover:rotate-[360deg] transition-transform duration-700">
+                    <i class="fa-solid fa-terminal"></i>
+                </div>
+                <h1 class="logo-font text-xl font-black hidden lg:block tracking-tighter text-white uppercase">Work<span class="text-blue-500">Flow</span></h1>
+            </a>
         </div>
 
-        <nav class="flex-1 space-y-2">
-            {% if request.user.recruter %}
-            <a href="{% url 'recruiter:recruter_page' %}" class="flex items-center gap-4 p-3 rounded-xl transition hover:bg-slate-50">
-                <i class="fa-solid fa-house text-xl text-blue-600"></i>
-                <span class="hidden lg:block">Home</span>
-            </a>
-            {% elif request.user.seeker %}
-            <a href="/" class="flex items-center gap-4 p-3 rounded-xl transition hover:bg-slate-50">
-                <i class="fa-solid fa-house text-xl text-blue-600"></i>
-                <span class="hidden lg:block">Home</span>
-            </a>
-            {% else %}
-            <a href="/" class="flex items-center gap-4 p-3 rounded-xl transition hover:bg-slate-50">
-                <i class="fa-solid fa-house text-xl text-blue-600"></i>
-                <span class="hidden lg:block">Home</span>
-            
-            {% endif %}
-            
+        <nav class="flex-1 px-4 space-y-2 relative z-10">
+            <div class="hidden lg:block pb-6">
+                <span class="text-[9px] font-bold text-slate-600 uppercase tracking-[0.4em] ml-4 font-mono opacity-80">// Primary_Node</span>
+            </div>
+
             {% if request.user.seeker %}
-            <a href="{% url 'seeker:jobs' %}" class="flex items-center gap-4 p-3 text-slate-500 hover:bg-slate-50 rounded-xl transition">
-                <i class="fa-solid fa-compass text-xl"></i>
-                <span class="hidden lg:block">Discover</span>
-            </a>
-            <a href="{% url 'seeker:profile' %}" class="flex items-center gap-4 p-3 text-slate-500 hover:bg-slate-50 rounded-xl transition">
-                <i class="fa-solid fa-compass text-xl"></i>
-                <span class="hidden lg:block">Profile</span>
-            </a>
+                <a href="{% url 'seeker:seeker_page' %}" 
+                    class="nav-anchor flex items-center gap-4 p-4 rounded-2xl font-bold text-[10px] uppercase tracking-widest {% if request.path == '/' or request.path == rec_home %} nav-link-active {% else %} text-slate-400 {% endif %}">
+                        <i class="fa-solid fa-layer-group text-lg"></i>
+                        <span class="hidden lg:block">Dashboard</span>
+                </a>
+                <a href="{% url 'seeker:jobs' %}" class="nav-anchor flex items-center gap-4 p-4 rounded-2xl text-slate-400 group text-[10px] font-bold uppercase tracking-widest">
+                    <i class="fa-solid fa-satellite-dish text-lg group-hover:text-blue-400"></i>
+                    <span class="hidden lg:block">Discover</span>
+                </a>
+                <a href="{% url 'seeker:profile' %}" class="nav-anchor flex items-center gap-4 p-4 rounded-2xl text-slate-400 group text-[10px] font-bold uppercase tracking-widest">
+                    <i class="fa-solid fa-user text-lg group-hover:text-blue-400"></i>
+                    <span class="hidden lg:block">Profile</span>
+                </a>
+                <a href="{% url 'seeker:my_saved_jobs' %}" class="nav-anchor flex items-center gap-4 p-4 rounded-2xl text-slate-400 group text-[10px] font-bold uppercase tracking-widest">
+                    <i class="fa-solid fa-bookmark text-lg group-hover:text-blue-400"></i>
+                    <span class="hidden lg:block">Archives</span>
+                </a>
             {% elif request.user.recruter %}
-            <a href="{% url 'recruiter:recruter_profile' %}" class="flex items-center gap-4 p-3 text-slate-500 hover:bg-slate-50 rounded-xl transition">
-                <i class="fa-solid fa-compass text-xl"></i>
-                <span class="hidden lg:block">Your Profile</span>
-            </a>
-            <a href="{% url 'recruiter:upload_docs' %}" class="flex items-center gap-4 p-3 text-slate-500 hover:bg-slate-50 rounded-xl transition">
-                <i class="fa-solid fa-file-invoice text-xl"></i>
-                <span class="hidden lg:block">Upload Documents</span>
-            </a>
-            <a href="{% url 'recruiter:subscription' %}" class="flex items-center gap-4 p-3 text-slate-500 hover:bg-slate-50 rounded-xl transition">
-                <i class="fa-solid fa-compass text-xl"></i>
-                <span class="hidden lg:block">Subscriptions</span>
-            </a>
+                <a href="{% url 'recruiter:recruter_page' %}" 
+                    class="nav-anchor flex items-center gap-4 p-4 rounded-2xl font-bold text-[10px] uppercase tracking-widest {% if request.path == '/' or request.path == rec_home %} nav-link-active {% else %} text-slate-400 {% endif %}">
+                        <i class="fa-solid fa-layer-group text-lg"></i>
+                        <span class="hidden lg:block">Dashboard</span>
+                </a>
+                <a href="{% url 'recruiter:recruter_profile' %}" class="nav-anchor flex items-center gap-4 p-4 rounded-2xl text-slate-400 group text-[10px] font-bold uppercase tracking-widest">
+                    <i class="fa-solid fa-building-user text-lg group-hover:text-blue-400"></i>
+                    <span class="hidden lg:block">Organization</span>
+                </a>
+                <a href="{% url 'recruiter:job_list' %}" class="nav-anchor flex items-center gap-4 p-4 rounded-2xl text-slate-400 group text-[10px] font-bold uppercase tracking-widest">
+                    <i class="fa-solid fa-building-user text-lg group-hover:text-blue-400"></i>
+                    <span class="hidden lg:block">My Jobs</span>
+                </a>
+            {% elif request.user.is_superuser %}
+               <a href="{% url 'Superuser:admin_home' %}" 
+                    class="nav-anchor flex items-center gap-4 p-4 rounded-2xl font-bold text-[10px] uppercase tracking-widest {% if request.path == '/' or request.path == rec_home %} nav-link-active {% else %} text-slate-400 {% endif %}">
+                        <i class="fa-solid fa-layer-group text-lg"></i>
+                        <span class="hidden lg:block">Dashboard</span>
+                </a>
             {% else %}
-            <a href="{% url 'recruiter:add_Plan'%}" class="flex items-center gap-4 p-3 text-slate-500 hover:bg-slate-50 rounded-xl transition">
-                <i class="fa-solid fa-compass text-xl"></i>
-                <span class="hidden lg:block">Subscription plan</span>
-            </a>
-            </a>
+                <a href="{% url 'seeker:jobs' %}" class="nav-anchor flex items-center gap-4 p-4 rounded-2xl text-slate-400 group text-[10px] font-bold uppercase tracking-widest">
+                    <i class="fa-solid fa-compass text-lg"></i>
+                    <span class="hidden lg:block">Explore</span>
+                </a>
+                <a href="{% url 'accounts:login' %}" class="nav-anchor flex items-center gap-4 p-4 rounded-2xl text-slate-400 group text-[10px] font-bold uppercase tracking-widest">
+                    <i class="fa-solid fa-key text-lg"></i>
+                    <span class="hidden lg:block">Auth_Gate</span>
+                </a>
             {% endif %}
-
-
         </nav>
 
-        <div class="mt-auto pt-4 border-t border-slate-100">
-            <a href="{% url 'accounts:logout' %}" class="flex items-center gap-4 p-3 text-slate-500 hover:text-rose-600 transition">
-                <i class="fa-solid fa-right-from-bracket text-xl"></i>
-                <span class="hidden lg:block font-medium">Logout</span>
-            </a>
-        </div>
-    </aside>
-
-    <div class="flex-1 flex flex-col">
-        
-        <header class="bg-white border-b border-slate-200 sticky top-0 z-30 px-6 py-4">
-            <div class="max-w-4xl mx-auto flex items-center gap-6">
-                <div class="flex-1 relative">
-                    <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-slate-400">
-                        
-                    </span>
-                    
+        {% if request.user.is_authenticated %}
+        <div class="mt-auto p-6 border-t border-white/5 bg-slate-950/30 relative z-10">
+            <div class="flex items-center gap-4 px-2">
+                <div class="relative">
+                    <img src="https://ui-avatars.com/api/?name={{ request.user.username }}&background=3b82f6&color=fff" class="w-9 h-9 rounded-xl shadow-lg ring-1 ring-white/10">
+                    <span class="absolute -bottom-1 -right-1 w-3 h-3 bg-emerald-500 border-2 border-slate-900 rounded-full animate-pulse"></span>
                 </div>
-                
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-full border-2 border-white shadow-sm overflow-hidden">
-                        <img src="https://ui-avatars.com/api/?name=User&background=0284c7&color=fff" alt="User">
-                        
-                    </div>
+                <div class="hidden lg:block overflow-hidden">
+                    <p class="text-[10px] font-bold text-white uppercase tracking-widest truncate">{{ request.user.username }}</p>
+                    <a href="{% url 'accounts:logout' %}" class="text-[9px] font-bold text-slate-500 hover:text-rose-400 transition-colors uppercase">$ sudo logout</a>
                 </div>
             </div>
-{% if messages %}
-<div class="fixed top-5 left-1/2 -translate-x-1/2 z-50 space-y-3">
-  {% for message in messages %}
-    <div class="
-      px-4 py-3 rounded-lg shadow-lg text-white
-      {% if message.tags == 'success' %} bg-green-500
-      {% elif message.tags == 'error' %} bg-red-500
-      {% elif message.tags == 'warning' %} bg-yellow-500 text-black
-      {% else %} bg-blue-500 {% endif %}
-    ">
-      <div class="flex justify-between items-center">
-        <span>{{ message }}</span>
-        <button onclick="this.parentElement.parentElement.remove()"
-                class="ml-4 text-xl font-bold">&times;</button>
-      </div>
-    </div>
-  {% endfor %}
-</div>
-{% endif %}
+        </div>
+        {% endif %}
+    </aside>
 
+    <div class="main-wrapper flex flex-col min-w-0">
+        <header class="h-20 flex items-center justify-between px-12 bg-white/80 backdrop-blur-md border-b border-zinc-200 sticky top-0 z-40">
+            <div class="flex flex-col">
+                <h2 class="text-[9px] font-bold uppercase tracking-[0.5em] text-slate-400 mb-1 font-mono opacity-70">BLUEPRINT_ENV_V2.5</h2>
+                <span class="logo-font text-lg font-black text-slate-800 tracking-tight uppercase">{% block breadcrumb %}Dashboard{% endblock %}</span>
+            </div>
+
+            <div class="flex items-center gap-6">
+                <div class="hidden md:flex items-center gap-3 px-4 py-2 bg-slate-900 text-white rounded-xl shadow-lg shadow-slate-200">
+                    <span class="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></span>
+                    <span class="text-[9px] font-bold uppercase tracking-widest font-mono">Status: Connected</span>
+                </div>
+                <button class="w-10 h-10 bg-white border border-zinc-200 rounded-xl flex items-center justify-center text-slate-400 hover:text-blue-600 transition-all"><i class="fa-regular fa-bell"></i></button>
+            </div>
         </header>
 
-        <main class="p-6 md:p-10">
-            {% block content %}
-            {% endblock content %}
+        <main id="main-content" class="page-transition flex-1 p-10 lg:p-16 relative">
+            {% block content %}{% endblock %}
         </main>
+
+        <footer class="px-12 py-8 bg-white/40 border-t border-zinc-200 backdrop-blur-sm">
+            <p class="text-[9px] font-bold text-slate-400 uppercase tracking-[0.4em] font-mono">&copy; 2026 WorkFlow Ecosystem // Optimized Architecture</p>
+        </footer>
     </div>
 
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const mainContent = document.getElementById('main-content');
+            const navAnchors = document.querySelectorAll('a.nav-anchor');
+
+            navAnchors.forEach(anchor => {
+                anchor.addEventListener('click', function(e) {
+                    const targetUrl = this.getAttribute('href');
+                    if (targetUrl && (targetUrl.startsWith('/') || targetUrl.includes(window.location.hostname))) {
+                        e.preventDefault();
+                        mainContent.classList.add('page-exit');
+                        setTimeout(() => { window.location.href = targetUrl; }, 400);
+                    }
+                });
+            });
+        });
+    </script>
+    <script>
+    // ── DISMISS A SINGLE MESSAGE ──
+    function dismissMessage(element) {
+      if (!element) return;
+      element.style.opacity = '0';
+      element.style.transform = 'translateY(-8px)';
+      // lock current height before collapsing
+      element.style.maxHeight = element.offsetHeight + 'px';
+      setTimeout(() => {
+        element.style.maxHeight = '0';
+        element.style.paddingTop = '0';
+        element.style.paddingBottom = '0';
+        element.style.marginBottom = '0';
+      }, 300);
+      setTimeout(() => element.remove(), 660);
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+
+      // Auto-dismiss messages with stagger
+      document.querySelectorAll('.message-item').forEach((msg, i) => {
+        setTimeout(() => dismissMessage(msg), 4000 + i * 800);
+      });
+
+      // Scroll reveal
+      const observer = new IntersectionObserver(entries => {
+        entries.forEach(e => {
+          if (e.isIntersecting) {
+            e.target.classList.add('visible');
+            observer.unobserve(e.target);
+          }
+        });
+      }, { threshold: 0.1 });
+      document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+      // Highlight active nav link
+      document.querySelectorAll('.nav-links a').forEach(link => {
+        if (link.href === window.location.href) {
+          link.style.color = '#60a5fa';
+          link.style.background = 'rgba(255,255,255,0.06)';
+        }
+      });
+
+    });
+  </script>
 </body>
 </html>

@@ -11,6 +11,7 @@ from .forms import *
 from django.http import HttpResponse,JsonResponse
 from django.contrib import messages
 import datetime
+from django.db.models import Q
 import json
 import razorpay
 from django.conf import settings
@@ -123,8 +124,13 @@ def post_job(request):
     except Recruter.DoesNotExist:
         messages.warning(request, "Please complete your recruiter profile first.")
         
+    try:
+        docs=documents.objects.get(recruter=current_recruter)
+    except documents.DoesNotExist:
+        messages.warning(request, "Please upload all required documents.")
+        return redirect('recruiter:upload_docs')
 
-    docs=documents.objects.get(recruter=current_recruter)
+
     if not current_recruter.is_profile_complete():
         messages.warning(request, "Please fill in all company details.")
         return redirect('recruiter:profile_update')
@@ -169,7 +175,8 @@ def post_job(request):
             job_vector = generate_vector(job_text)
             new_job = job.objects.create(title=title, discription=discription, skills=skills_list, education=education, experience=experience, salary=salary, responsablity=responsablity,job_vector=job_vector, due=due, recruter=current_recruter,banner=banner)
             new_job.save()
-            return HttpResponse("Job Posted")
+            messages.success(request, 'Job posted successfully!')
+            return redirect('recruiter:recruter_page')
     else:
         form = job_form()
     
@@ -223,7 +230,8 @@ def update_jobs(request,job_id):
             if 'banner' in request.FILES:
                 current_job.banner = request.FILES['banner']
             current_job.save()
-            return HttpResponse("Job Posted")
+            messages.success(request, 'Job updated successfully!')
+            return redirect('recruiter:recruter_home')
     else:
         form = job_form(initial={
             'title':current_job.title,
@@ -246,6 +254,13 @@ def job_list(request):
     jobs = job.objects.filter(recruter=current_recruter)
     count=jobs.count()
     today=datetime.date.today()
+    q = request.GET.get('q')
+    if q:
+        jobs = jobs.filter(
+            Q(title__icontains=q)|
+            Q(recruter__company_name__icontains=q)|
+            Q(created_at__icontains=q)
+        )
     return render(request, 'recruter_temp/job_list.html', {'jobs': jobs,'count':count,'today':today})
 
 @login_required
@@ -404,7 +419,7 @@ def create_payment(request,plan_id):
         recruiter.sub_due = None
         recruiter.plan = plan
         recruiter.save()
-        return redirect("recruitr:recruter_page")
+        return redirect("recruiter:recruter_page")
 
     amount = plan.price * 100  # Razorpay uses paise
 
@@ -465,7 +480,7 @@ def subscription_detials(request):
     
     # Calculate progress bar percentage
     if current_recruter.plan and current_recruter.plan.job_limit:
-        usage_percent = (jobs_posted / recruiter.plan.job_limit) * 100
+        usage_percent = (jobs_posted / current_recruter.plan.job_limit) * 100
     else:
         usage_percent = 0
 

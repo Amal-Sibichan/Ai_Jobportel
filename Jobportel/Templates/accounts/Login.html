@@ -5,6 +5,7 @@
 {% block branding_text %}Welcome <br><span class="text-blue-400">Back.</span>{% endblock %}
 
 {% block auth_content %}
+
 <div class="space-y-8 py-4">
     <div class="text-center md:text-left">
         <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 text-blue-600 text-[10px] font-black uppercase tracking-widest mb-4 border border-blue-100">
@@ -13,6 +14,7 @@
         <h2 class="text-4xl font-black text-slate-900 tracking-tight">Sign In</h2>
         <p class="text-slate-400 text-sm mt-2 font-medium">Elevate your career journey today.</p>
     </div>
+    
 
     <form method="POST" class="space-y-5">
         {% csrf_token %}
