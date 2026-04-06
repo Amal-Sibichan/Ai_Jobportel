@@ -137,8 +137,8 @@ MEDIA_ROOT=os.path.join(BASE_DIR,'media')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-RAZORPAY_KEY_ID = ""
-RAZORPAY_KEY_SECRET = ""
+RAZORPAY_KEY_ID = "rzp_test_SGJIdexcQ2TVoQ"
+RAZORPAY_KEY_SECRET = "G67qn6rk4VIgWNX65EYJJMvu"
 
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
@@ -147,5 +147,5 @@ EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 
-EMAIL_HOST_USER = ''
-EMAIL_HOST_PASSWORD = ''
+EMAIL_HOST_USER = 'amalsidichan56@gmail.com'
+EMAIL_HOST_PASSWORD = 'wszx ctgw lzjp jloc'

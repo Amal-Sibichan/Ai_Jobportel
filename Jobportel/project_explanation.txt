@@ -1,0 +1,329 @@
+PROJECT OVERVIEW - JobPortel (Django Job Portal)
+===============================================
+
+This Django project implements a simple job portal platform with three main user roles:
+
+1. **Job Seeker** (Seeker app): Create a profile, upload a resume, add skills/education/experience, and apply to jobs.
+2. **Recruiter** (Recruiter app): Create a company profile, submit business documents, post jobs, manage job applications, and use AI-powered candidate scoring.
+3. **Admin / Superuser** (Superuser app): Approve recruiter documents and plans.
+
+The project is built with Django and includes AI-powered resume analysis using:
+- `sentence-transformers` (for vector embeddings)
+- `spaCy` (for entity extraction)
+- `groq` (for calling an LLM to parse resumes and answer recruiter questions)
+- `pgvector` (to store vector embeddings in Postgres)
+
+
+FILE / FOLDER STRUCTURE (KEY ITEMS)
+----------------------------------
+
+Jobportel/ (root Django project)
+  - `manage.py`: Django command entry point.
+  - `Jobportel/`: Main Django project settings and URLs.
+  - `accounts/`: Login, registration.
+  - `main/`: Landing page and home redirects.
+  - `Seeker/`: Seeker-side models, views, forms, resume processing, and scoring utilities.
+  - `recruiter/`: Recruiter-side models, views, forms, job posting, subscription, candidate review.
+  - `Superuser/`: Admin workflows for approving recruiters.
+  - `Templates/`: All HTML templates used across the site.
+  - `media/`: Stores uploaded files (resumes, logos, docs, etc.).
+
+
+KEY PACKAGES / DEPENDENCIES USED
+--------------------------------
+
+- Django: web framework.
+- `pgvector`: stores vector embeddings in Postgres.
+- `sentence-transformers`: compute embedding vectors for job descriptions and resumes.
+- `spaCy`: entity recognition for resume scoring.
+- `PyPDF2`: extract text from uploaded PDF resumes.
+- `groq`: interacts with the Groq LLM API (used for ATS parsing and chat bot).
+- `razorpay`: payment integration for recruiter plans.
+
+
+APP-BY-APP / FILE-BY-FILE OVERVIEW
+---------------------------------
+
+1) `accounts/`
+   - `models.py`: (Not present; uses built-in Django User model.)
+   - `forms.py`: `login_form`, `register` form with custom validation (email format, password strength, etc.).
+   - `views.py`: `login_user`, `logout_user`, `register_user`.
+
+2) `main/`
+   - `views.py`: `home` (redirects based on user type or shows jobs); `landing` (landing page).
+
+3) `Superuser/`
+   - `views.py`: Admin dashboard (`admin_home`), verify recruiter docs (`verify`), update verification status (`update`).
+
+4) `Seeker/`
+   - `models.py`: Seeker profile, resume, skills, experience, education, job application scoring and saved jobs.
+   - `forms.py`: Forms for profile update, resume upload, education, experience. Includes validation logic.
+   - `utils.py`: Core scoring logic (Jaccard skill match, semantic similarity, entity scoring, ATS scoring, vector generation, email sending).
+   - `LLM.py`: Uses the Groq LLM to parse resume content into structured JSON and power a recruiter chat bot.
+   - `views.py`: Seeker dashboard, profile editing, resume upload (including LLM and scoring flow), job application flow, skill add/delete, education/experience CRUD.
+
+5) `recruiter/`
+   - `models.py`: Recruiter profile, business documents, job postings, subscription Plans.
+   - `forms.py`: Recruiter profile form, document upload form, job posting form, plan creation form.
+   - `views.py`: Profile pages, document workflow, job posting/editing, candidate pool & details, subscription / payment, chat bot.
+
+
+DETAILED VIEW + CODE LINE EXPLANATION (key views)
+--------------------------------------------------
+
+Below is an annotated walkthrough of the primary view modules in this project. Each section explains what the view does and how the supported code works.
+
+---
+
+## 1) accounts/views.py
+
+This app handles user login, logout, and registration.
+
+### `login_user(request)`
+- If request method is POST, validate `login_form`.
+- On success, logs in the user and redirects based on role:
+  - If user has a `recruter` relation, go to recruiter dashboard.
+  - If user has a `seeker` relation, go to seeker dashboard.
+  - If user is staff, go to admin dashboard.
+- On GET, it renders the login form.
+
+### `logout_user(request)`
+- Calls Django's `logout(request)` to clear session.
+- Adds an info message and redirects to the landing page.
+
+### `register_user(request)`
+- On POST, validates `register` form which collects name, email, role, and password.
+- On success, creates a `User` and either a `seeker` or `Recruter` profile depending on role.
+- Redirects to login on success.
+- On GET, renders the registration form.
+
+---
+
+## 2) main/views.py
+
+This app provides landing pages and the home page.
+
+### `home(request)`
+- Fetches all jobs, using `select_related('recruter')` for performance.
+- If a user is authenticated, it redirects them based on role:
+  - Superuser -> admin home
+  - Recruiter -> recruiter home
+  - Seeker -> seeker home
+- Otherwise, renders `main/home.html` with the jobs list.
+
+### `landing(request)`
+- Renders `main/landing.html` (commonly the site entry page).
+
+---
+
+## 3) Superuser/views.py
+
+This app is for the staff/admin user to approve recruiter accounts.
+
+### `admin_home(request)`
+- `@staff_member_required` ensures only staff can access.
+- Counts seekers, recruiters, pending approvals.
+- Fetches recent seekers and recruiters to show on dashboard.
+
+### `verify(request, u_id)`
+- Loads `Recruter` by ID.
+- Ensures a `documents` record exists (creates one if missing).
+- Renders `admin/verify_docs.html`, showing recruiter info + documents.
+
+### `update(request, r_id)`
+- Loads recruiter and related document record.
+- On POST, reads checkbox values from the form and sets `*_verified` boolean flags.
+- If all required documents are present and verified, marks recruiter `approval_status` as APPROVED.
+- Otherwise sets status to PENDING.
+- Redirects back to admin home.
+
+---
+
+## 4) Seeker/views.py (core candidate-facing flows)
+
+This is where job seekers manage profiles, upload resumes, and apply.
+
+### `seeker_home(request)`
+- Requires login.
+- Loads the current seeker profile.
+- Displays jobs whose `due` date is >= today (active listings).
+
+### `profile(request)`
+- Requires login.
+- Loads seeker profile, resume, experiences, education, and skills.
+- Prepares forms for adding education/experience.
+
+### `add_skill(request)`
+- POST-only (via `@require_POST`).
+- Reads JSON from request body, creates a new `skill` record for the seeker.
+- Returns JSON success or error.
+
+### `delete_skill(request, skill_id)`
+- DELETE-only.
+- Deletes a skill only if it belongs to the current seeker.
+
+### `profileupdate(request)`
+- Updates seeker profile fields and associated User fields (name, email).
+- Handles image upload if provided.
+
+### `Resume_upload(request)`
+- Handles resume file upload.
+- Uses `extract()` to read text from the PDF.
+- Generates a text embedding vector via `generate_vector()`.
+- Calls `extract_skills_llm()` (Groq LLM) to parse resume into structured JSON.
+- Calculates ATS score, entity score, and stores skills + scores.
+
+### `job_application(request, job_id)`
+- Requires the seeker to have uploaded a resume.
+- Calculates matching scores with a job posting:
+  - Jaccard skill match
+  - Semantic similarity between text vectors
+  - ATS score and entity score from resume analysis
+- Computes a final weighted score and creates an `application` record.
+
+### `add_education(request)`
+- Creates an Education record for the seeker from the submitted form.
+- Returns JSON success.
+
+---
+
+## 5) recruiter/views.py (recruiter side)
+
+This app is the largest piece and powers companies posting jobs and reviewing applicants.
+
+### Shared helpers
+
+- `is_recruter(user)`: helper that returns True if a User has a `recruter` OneToOne relation.
+- `check_subscription(recruiter)`: verifies subscription status and updates it if expired.
+
+### `recruter_home(request)`
+- Dashboard for recruiters.
+- Loads recruiter, recent jobs, job count, and application count.
+- Sends data to `recruter_home.html` (recruiter dashboard).
+
+### `recruter_profile(request)`
+- Renders profile view showing user and recruiter info.
+
+### `recruter_update(request)`
+- Allows recruiters to update profile fields.
+- Validates form and updates both User and Recruter models.
+- Supports uploading a company logo.
+
+### `upload_docs(request)`
+- Uploads required corporate documents (GST, PAN, registration, address proof).
+- Marks all verifications as false upon upload.
+- Recruiter will be approved by admin after verification.
+
+### `post_job(request)`
+- Guard checks:
+  - Ensure recruiter profile exists and is complete.
+  - Ensure recruiter docs exist and are complete.
+  - Ensure the recruiter is approved (admin-approved).
+
+- On POST:
+  - Validate `job_form`.
+  - Extract fields.
+  - Parse `skills` as a comma-separated list.
+  - Build a text prompt `job_text` containing title, description, skills, etc.
+  - Generate a vector embedding using `generate_vector(job_text)`.
+  - Create a `job` record storing the embedding as `job_vector`.
+  - Redirect to recruiter dashboard.
+
+### `update_jobs(request, job_id)`
+- Allows editing an existing job.
+- Computes a new vector embedding when job details change.
+- Allows optional replacement of the banner image.
+
+### `job_list(request)`
+- Lists all jobs posted by the current recruiter.
+- Supports a search query (`q`) over title, company name, and created date.
+
+### `candidate_pool(request, job_id)`
+- Requires an active subscription with resume pooling enabled.
+- Fetches all applications for a job.
+- Provides counts for each category (excellent/good/low).
+
+### `candidate_details(request, candidate_id, job_id)`
+- Shows detailed info about a candidate's application.
+- Loads the application and related resume data.
+- Splits matched/unmatched skills into lists for display.
+
+### `ask_bot(request)`
+- Integrates an AI chatbot for recruiters to ask questions about a candidate.
+- Accepts POST requests with JSON containing `message` and `user_id` (application ID).
+- Loads the application and passes context to `resume_bot()`.
+- Returns the AI response as JSON.
+
+### `shorlist(request, app_id)` (typo, should be `shortlist`)
+- Marks an application as SHORTLISTED.
+- Redirects back to candidate details.
+
+### `shortlist_candidate(request, app_id)`
+- Marks an application as SHORTLISTED.
+- Sends an email notification to the candidate using `send_shortlist_email`.
+
+### `Reject(request, app_id)`
+- Marks an application as REJECTED.
+- Redirects back to candidate details.
+
+---
+
+## KEY SUPPORTING MODULES (UTILS / LLM)
+
+### `Seeker/utils.py` (core scoring and embedding)
+- `clean_text(text)`: normalize whitespace and lowercases.
+- `generate_vector(text)`: embeds text using `sentence-transformers`.
+- `extract(resume)`: reads PDF text using `PyPDF2`.
+- `jaccard_skill_score(data, required_skills)`: returns a score based on overlap between resume skills and job skills.
+- `entity_score_spacy(resume_text)`: runs spaCy NER and scores based on presence of key entity types.
+- `semantic_similarity(resume_vector, jd_vector)`: cosine similarity between vectors.
+- `pool_score(final_score)`: maps numeric score to buckets (`Excellent`, `Good`, `low`).
+- `atscore(data)`: produces an ATS-style score based on detected fields and resume structure.
+- `send_shortlist_email(...)`: uses Django `send_mail` to email candidate about being shortlisted.
+
+### `Seeker/LLM.py` (Groq chatbot and resume parsing)
+- `extract_skills_llm(resume_text)`: sends a prompt to Groq LLM to return structured JSON about the resume (skills + ATS indicators). It parses the LLM response and returns JSON string.
+- `resume_bot(ctx, question)`: sends recruiter context + question to Groq LLM and returns the chatbot reply.
+
+---
+
+## IMPORTANT NOTES (HOW DATA FLOWS)
+
+1) **Registration**
+   - User creates account -> Django `User` created -> `seeker` or `Recruter` profile created.
+
+2) **Recruiter Approvals**
+   - Recruiter fills profile + uploads documents.
+   - Admin reviews documents and toggles verification flags.
+   - When all docs are verified, the recruiter is marked APPROVED.
+
+3) **Posting Jobs**
+   - Recruiter fills job form.
+   - System generates a semantic embedding of job text.
+   - Job is stored with that vector for matching later.
+
+4) **Resume Upload + Scoring**
+   - Seeker uploads PDF.
+   - System extracts text, runs LLM to identify skills and ATS signals.
+   - System creates an embedding vector for the resume.
+   - When applying, scores are computed between resume and job details.
+
+5) **Application Scoring**
+   - Skill overlap (Jaccard)
+   - Semantic similarity (embedding cosine)
+   - ATS completeness / formatting score
+   - Entity extraction score
+   - Combined into `final_score` and categorized for recruiter prioritization.
+
+
+---
+
+## HOW TO USE THIS DOCUMENT
+
+- Read the "PROJECT OVERVIEW" section to get the big picture.
+- Use the "APP-BY-APP" section to locate where a feature lives.
+- Use the "DETAILED VIEW" section when you need to understand the behavior of a specific endpoint.
+- The "IMPORTANT NOTES" section explains the end-to-end flow of the core features.
+
+
+(End of document.)

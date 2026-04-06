@@ -108,7 +108,8 @@
                                 <p class="text-[10px] font-medium text-emerald-700 leading-relaxed mb-6 italic">
                                     Our AI has synced your profile. The recruitment team at <strong>{{ job.recruter.company_name }}</strong> will contact you via email if your skills match.
                                 </p>
-                                
+                                <a href="{% url 'seeker:my_application_status' job.id %}" class="inline-flex items-center gap-2 text-xs font-black text-slate-900 hover:text-slate-800 transition">
+                                <i class="fa-solid fa-arrow-right"></i> View Status
                             </div>
                         {% else %}
                             <a href="{% url 'seeker:application' job.id %}" class="block w-full py-4 bg-blue-600 text-white rounded-2xl font-black text-xs uppercase tracking-[0.2em] text-center shadow-xl shadow-blue-100 hover:bg-blue-700 transition">

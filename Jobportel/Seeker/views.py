@@ -299,8 +299,12 @@ def my_application_status(request,job_id):
     job_instance = job.objects.get(id=job_id)
     user = seeker.objects.get(user=request.user)
     application_instance = application.objects.get(job=job_instance,seeker=user)
+    matched = application_instance .matched_skills.split(", ") if application_instance .matched_skills else []
+    unmatched = application_instance .unmatched_skills.split(", ") if application_instance .unmatched_skills else []
     context = {
         'application': application_instance,
+        'matched':matched,
+        'unmatched':unmatched
     }
     return render(request, 'seeker/myapplication.html', context)
 
