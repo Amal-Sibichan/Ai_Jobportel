@@ -29,7 +29,8 @@ SECRET_KEY = config('SECRET_KEY', default='django-insecure-k%joobwyjz(saaa^_a3a=
 DEBUG = False
 
 ALLOWED_HOSTS = ['*']
-
+if 'RENDER' in os.environ:
+    ALLOWED_HOSTS = [os.environ.get('RENDER_EXTERNAL_HOSTNAME')]
 
 # Application definition
 
@@ -50,13 +51,13 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',
 ]
 
 ROOT_URLCONF = 'Jobportel.urls'
@@ -82,15 +83,20 @@ WSGI_APPLICATION = 'Jobportel.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql',
+#         'NAME': 'finalproject',
+#         'USER':'postgres',
+#         'PASSWORD':'amal123',
+#         'HOST':'localhost',
+#         'PORT':'5432',
+#     }
+# }
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'finalproject',
-        'USER':'postgres',
-        'PASSWORD':'amal123',
-        'HOST':'localhost',
-        'PORT':'5432',
-    }
+    'default': dj_database_url.config(
+        default=os.environ.get('DATABASE_URL')
+    )
 }
 
 
@@ -129,8 +135,10 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = 'static/'
-STATICFILES_DIRS=[
-    BASE_DIR/'static']
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')  # ✅ added
+STATICFILES_DIRS = [BASE_DIR / 'static']
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'  # ✅ added
+
 
 MEDIA_URL='/media/'
 MEDIA_ROOT=os.path.join(BASE_DIR,'media')
