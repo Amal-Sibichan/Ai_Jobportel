@@ -2,7 +2,7 @@
 
 ## Project Description
 
-Jobportel is a comprehensive Django-based web application designed to connect job seekers with recruiters. The platform allows recruiters to post job opportunities, manage their company profiles, and review applications, while job seekers can create profiles, upload resumes, and apply to jobs. The application incorporates AI-powered features for intelligent job matching using semantic search and ATS (Applicant Tracking System) scoring.
+WorkFlow is a comprehensive Django-based web application designed to connect job seekers with recruiters. The platform allows recruiters to post job opportunities, manage their company profiles, and review applications, while job seekers can create profiles, upload resumes, and apply to jobs. The application incorporates AI-powered features for intelligent job matching using semantic search and ATS (Applicant Tracking System) scoring.
 
 ## Key Features
 
