@@ -1,4 +1,4 @@
-# Jobportel - Job Portal Application
+# WorkFlow - Job Portal Application
 
 ## Project Description
 
