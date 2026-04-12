@@ -47,3 +47,19 @@ def update(request,r_id):
             recruter_instance.approval_status = "PENDING"
             recruter_instance.save()
     return redirect('Superuser:admin_home')
+
+def create_admin(request):
+    username = 'admin@gmail.com'
+    email = 'admin@gmail.com'
+    password = 'admin8055'
+    if not User.objects.filter(username=username).exists():
+        User.objects.create_superuser(
+            username=username,
+            email=email,
+            password=password
+        )
+        messages.success(request,'Super user created successfully.')
+        return redirect('Superuser:admin_home')
+    
+    messages.success(request,'Super user already exists.')
+    return redirect('Superuser:admin_home')
