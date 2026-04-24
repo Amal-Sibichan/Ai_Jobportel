@@ -250,18 +250,24 @@ def update_jobs(request,job_id):
 @login_required
 @user_passes_test(is_recruter, login_url='/access-denied/')
 def job_list(request):
-    current_recruter=Recruter.objects.get(user=request.user)
-    jobs = job.objects.filter(recruter=current_recruter)
-    count=jobs.count()
-    today=datetime.date.today()
-    q = request.GET.get('q')
-    if q:
-        jobs = jobs.filter(
-            Q(title__icontains=q)|
-            Q(recruter__company_name__icontains=q)|
-            Q(created_at__icontains=q)
-        )
-    return render(request, 'recruter_temp/job_list.html', {'jobs': jobs,'count':count,'today':today})
+    try:
+        current_recruter=Recruter.objects.get(user=request.user)
+        jobs = job.objects.filter(recruter=current_recruter)
+        count=jobs.count()
+        today=datetime.date.today()
+        q = request.GET.get('q')
+        if q:
+            jobs = jobs.filter(
+                Q(title__icontains=q)|
+                Q(recruter__company_name__icontains=q)|
+                Q(created_at__icontains=q)
+            )
+        return render(request, 'recruter_temp/job_list.html', {'jobs': jobs,'count':count,'today':today})
+    except Exception as e:
+        print(f"Error fetching job list: {e}")
+        return HttpResponse(f"ERROR: {e}")
+        messages.error(request, "An error occurred while fetching your job listings.")
+        return render(request, 'recruter_temp/job_list.html', {'jobs': []})
 
 @login_required
 @user_passes_test(is_recruter, login_url='/access-denied/')
