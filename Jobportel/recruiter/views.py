@@ -5,7 +5,7 @@ from django.contrib.auth.models import *
 from django.contrib.auth.decorators import login_required,user_passes_test
 from django.contrib.admin.views.decorators import staff_member_required
 from django.views.decorators.http import require_POST, require_http_methods
-from Seeker.utils import extract,entity_score_spacy,atscore,pool_score,semantic_similarity,jaccard_skill_score,generate_vector,send_shortlist_email
+from Seeker.utils import extract,send_shortlist_email
 from Seeker.LLM import resume_bot
 from .forms import *
 from django.http import HttpResponse,JsonResponse
@@ -172,6 +172,7 @@ def post_job(request):
                         responsablity:
                         {responsablity}
                         """
+            from Seeker.utils import generate_vector
             job_vector = generate_vector(job_text)
             new_job = job.objects.create(title=title, discription=discription, skills=skills_list, education=education, experience=experience, salary=salary, responsablity=responsablity,job_vector=job_vector, due=due, recruter=current_recruter,banner=banner)
             new_job.save()
@@ -217,6 +218,7 @@ def update_jobs(request,job_id):
                         responsablity:
                         {responsablity}
                         """
+            from Seeker.utils import generate_vector
             job_vector = generate_vector(job_text)
             current_job.title=title
             current_job.discription = discription
