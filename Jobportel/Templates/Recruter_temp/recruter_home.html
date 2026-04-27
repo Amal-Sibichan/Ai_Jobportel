@@ -73,7 +73,7 @@
         </div>
 
         <div class="bg-white rounded-[2.5rem] border border-slate-200 shadow-sm overflow-hidden">
-            <div class="p-8 border-b border-slate-50 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div class="p-4 sm:p-8 border-b border-slate-50 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
                     <h3 class="font-black text-slate-800 text-xl tracking-tight">Active Job Listings</h3>
                     <p class="text-xs text-slate-400 font-medium">Manage and track your published positions.</p>
@@ -88,17 +88,17 @@
                 <table class="w-full text-left border-collapse">
                     <thead>
                         <tr class="bg-slate-50/50 text-slate-400 text-[10px] font-black uppercase tracking-widest">
-                            <th class="px-8 py-5">Position</th>
-                            <th class="px-8 py-5">Applicants</th>
-                            <th class="px-8 py-5">Expiry</th>
-                            <th class="px-8 py-5">Status</th>
-                            <th class="px-8 py-5 text-right">Actions</th>
+                            <th class="px-4 py-3 sm:px-8 sm:py-5">Position</th>
+                            <th class="px-4 py-3 sm:px-8 sm:py-5">Applicants</th>
+                            <th class="px-4 py-3 sm:px-8 sm:py-5">Expiry</th>
+                            <th class="px-4 py-3 sm:px-8 sm:py-5">Status</th>
+                            <th class="px-4 py-3 sm:px-8 sm:py-5 text-right">Actions</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-50">
                         {% for job in jobs %}
                         <tr class="group hover:bg-blue-50/30 transition-all duration-200">
-                            <td class="px-8 py-6">
+                            <td class="px-4 py-4 sm:px-8 sm:py-6">
                                 <div class="flex items-center gap-4">
                                     <div class="w-10 h-10 bg-slate-100 rounded-xl flex items-center justify-center text-slate-400 font-bold group-hover:bg-blue-100 group-hover:text-blue-600 transition">
                                         {{ job.title|slice:":1" }}
@@ -109,22 +109,16 @@
                                     </div>
                                 </div>
                             </td>
-                            <td class="px-8 py-6">
-                                <div class="flex items-center gap-3">
-                                    <div class="flex -space-x-2">
-                                        <img src="https://ui-avatars.com/api/?name=User+1&background=random" class="w-8 h-8 rounded-full border-2 border-white">
-                                        <img src="https://ui-avatars.com/api/?name=User+2&background=random" class="w-8 h-8 rounded-full border-2 border-white">
-                                        <div class="w-8 h-8 rounded-full border-2 border-white bg-slate-900 flex items-center justify-center text-[8px] font-black text-white">
-                                            +{{ job.applications.count|add:"-2" }}
-                                        </div>
-                                    </div>
+                            <td class="px-4 py-4 sm:px-8 sm:py-6">
+                                <div class="flex items-center gap-2">
+                                    <i class="fa-solid fa-users text-slate-400 text-sm"></i>
                                     <span class="text-xs font-bold text-slate-600">{{ job.applications.count }} Applied</span>
                                 </div>
                             </td>
-                            <td class="px-8 py-6 text-xs font-bold text-slate-500">
+                            <td class="px-4 py-4 sm:px-8 sm:py-6 text-xs font-bold text-slate-500">
                                 {{ job.due|date:"M d, Y" }}
                             </td>
-                            <td class="px-8 py-6">
+                            <td class="px-4 py-4 sm:px-8 sm:py-6">
                                 {% if job.due >= today %}
                                 <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-50 text-emerald-600 rounded-full text-[10px] font-black uppercase tracking-tighter border border-emerald-100">
                                     <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
@@ -136,7 +130,7 @@
                                 </span>
                                 {% endif %}
                             </td>
-                            <td class="px-8 py-6 text-right">
+                            <td class="px-4 py-4 sm:px-8 sm:py-6 text-right">
                                 <div class="flex justify-end gap-2">
                                     <a href="{% url 'recruiter:candidate_pool' job.id %}" class="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition" title="View Applicants">
                                         <i class="fa-solid fa-users-viewfinder text-sm">view</i>
@@ -149,7 +143,7 @@
                         </tr>
                         {% empty %}
                         <tr>
-                            <td colspan="5" class="px-8 py-20 text-center">
+                            <td colspan="5" class="px-4 py-10 sm:px-8 sm:py-20 text-center">
                                 <div class="flex flex-col items-center">
                                     <i class="fa-solid fa-folder-open text-slate-200 text-5xl mb-4"></i>
                                     <p class="text-slate-400 font-bold">No active jobs found.</p>

@@ -113,7 +113,7 @@ def upload_docs(request):
             return redirect('recruiter:upload_docs')
     else:
         form=DocumentUploadForm()
-    return render(request, 'recruter_temp/upload_docs.html',{'form':form,'docs':docs})
+    return render(request, 'Recruter_temp/upload_docs.html',{'form':form,'docs':docs})
     
 @login_required
 @user_passes_test(is_recruter, login_url='/access-denied/')
@@ -181,7 +181,7 @@ def post_job(request):
         form = job_form()
     
 
-    return render(request, 'recruter_temp/Post_job.html', {'form': form})
+    return render(request, 'Recruter_temp/Post_job.html', {'form': form})
 
 def update_jobs(request,job_id):
     current_job=get_object_or_404(job,id=job_id)
@@ -264,10 +264,8 @@ def job_list(request):
             )
         return render(request, 'recruter_temp/job_list.html', {'jobs': jobs,'count':count,'today':today})
     except Exception as e:
-        print(f"Error fetching job list: {e}")
-        return HttpResponse(f"ERROR: {e}")
         messages.error(request, "An error occurred while fetching your job listings.")
-        return render(request, 'recruter_temp/job_list.html', {'jobs': []})
+        return render(request, 'Recruter_temp/job_list.html', {'jobs': []})
 
 @login_required
 @user_passes_test(is_recruter, login_url='/access-denied/')
